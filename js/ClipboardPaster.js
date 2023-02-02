@@ -1,36 +1,25 @@
+Yes3.MONITOR_INTERVAL = 200; // branching and image relocation loop
 
-Yes3.processPastableFields = function(){
-
-    //console.log('processPastableFields', Yes3.pastable_fields);
-
-    for(let i=0; i<Yes3.pastable_fields.length; i++){
-
-        if ( !$(`td#yes3-inline-image-${Yes3.pastable_fields[i]}`).length ) {
-
-            let $itemContainerRow = $(`tr#${Yes3.pastable_fields[i]}-tr`);
-
-            $imageRow = $('<tr>', {
-
-                'class': 'yes3-inline-image-row'
-            }).append($('<td>', {
-
-                'colspan': '2',
-                'class': 'yes3-inline-image-container',
-                'data-field_name': Yes3.pastable_fields[i],
-                'id': `yes3-inline-image-${Yes3.pastable_fields[i]}`,
-                'text': 'click here to paste an image from the clipboard',
-                'title': 'click here to paste an image from the clipboard',
-                'click': function(){
-
-                    Yes3.pasteImage( Yes3.pastable_fields[i] );
-                }
-            }))
-
-            $itemContainerRow.after( $imageRow );
-        }
-    }
+Yes3.labels = {
+    'click_to_paste': 'Click here to paste an image from the clipboard.',
+    'no_clicks': 'To replace this image, first remove it.'
 }
 
+Yes3.UI = function(){
+
+
+    /**
+     * Pasteable upload fields
+     */
+    Yes3.UI_PasteableUploadFields();
+
+    /**
+     * textarea renovations
+     */
+    Yes3.UI_TextAreaFields();
+
+}
+/*
 Yes3.relocateInlineImages = function() {
 
     //$('tr.yes3-inline-image-row').remove();
@@ -47,7 +36,8 @@ Yes3.relocateInlineImages = function() {
         }
     })
 }
-
+*/
+/*
 Yes3.relocateInlineImage = function( field_name, $img ) {
 
     const $container = $(`td#yes3-inline-image-${field_name}`);
@@ -62,8 +52,41 @@ Yes3.relocateInlineImage = function( field_name, $img ) {
         .addClass('yes3-file-upload-inline')
     ;
 }
+*/
 
-Yes3.relocateTextFields = function() {
+Yes3.UI_PasteableUploadFields = function() {
+    
+    for(let i=0; i<Yes3.pasteable_fields.length; i++){
+
+        if ( !$(`td#yes3-inline-image-${Yes3.pasteable_fields[i]}`).length ) {
+
+            let $itemContainerRow = $(`tr#${Yes3.pasteable_fields[i]}-tr`);
+
+            $imageRow = $('<tr>', {
+
+                'class': 'yes3-inline-image-row',
+                'field_name': Yes3.pasteable_fields[i],
+                'id': `yes3-inline-image-row-${Yes3.pasteable_fields[i]}`
+            }).append($('<td>', {
+
+                'colspan': '2',
+                'class': 'yes3-inline-image-container yes3-clickable',
+                'data-field_name': Yes3.pasteable_fields[i],
+                'id': `yes3-inline-image-${Yes3.pasteable_fields[i]}`/*,
+                'text': Yes3.labels.click_to_paste,
+                'title': Yes3.labels.click_to_paste,
+                'click': function(){
+
+                    Yes3.pasteImage( Yes3.pasteable_fields[i] );
+                }*/
+            }))
+
+            $itemContainerRow.after( $imageRow );
+        }
+    }
+}
+
+Yes3.UI_TextAreaFields = function() {
 
     const $textFields = $('textarea.notesbox');
 
@@ -75,13 +98,16 @@ Yes3.relocateTextFields = function() {
 
         $(this).addClass('yes3-textarea');
 
-        $inputRow = $('<tr>', {'class': 'yes3-textarea-row'})
+        $inputRow = $('<tr>', {
+                'class': 'yes3-textarea-row',
+                'field_name': field_name,
+                'id': `yes3-textarea-row-${field_name}`
+            })
             .append( $('<td>', {
                 'colspan': '2',
                 'class': 'yes3-textarea',
-                'data-field_name': field_name,
-                'id': `yes3-textarea-${field_name}`,
-                'sq_id': field_name
+                'field_name': field_name,
+                'id': `yes3-textarea-${field_name}`
                 }).append( $(this) )
             )
         ;
@@ -92,6 +118,7 @@ Yes3.relocateTextFields = function() {
         $(`div#${field_name}-expand`).remove();
     });
 }
+
 /**
  * ref: https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/read
  * 
@@ -113,6 +140,8 @@ Yes3.pasteImage = async function ( field_name ) {
             if (!item.types.includes('image/png')) {
 
                 Yes3.notAnImage(field_name);
+
+                return;
             }
 
             const blob = await item.getType('image/png');
@@ -158,7 +187,67 @@ Yes3.notAnImage = function( field_name ){
     }, 3000);
 }
 
-Yes3.checkBranching = function(){
+Yes3.monitor = function(){
+
+    Yes3.monitorBranching();
+    Yes3.monitorImages();
+}
+
+Yes3.monitorImages = function(){
+
+    $('tr.yes3-inline-image-row').each(function(){
+
+        const $prevRow = $(this).prev();
+
+        const field_name = $prevRow.attr('sq_id');
+
+        const hasData = $prevRow.find('a.filedownloadlink').is(':visible');
+
+        const $tdImageContainer = $(`td#yes3-inline-image-${field_name}`);
+
+        const $inLineImage = $prevRow.find('img.file-upload-inline');
+
+        if ( !hasData ){
+
+            if ( $tdImageContainer.find('img').length ) {
+
+                $tdImageContainer
+                    .empty()
+                ;
+            }
+
+            if ( !$tdImageContainer.html().length ){
+
+                $tdImageContainer
+                    .addClass('yes3-clickable')
+                    .attr('title', Yes3.labels.click_to_paste)
+                    .html(Yes3.labels.click_to_paste)
+                    .on('click', function(){ Yes3.pasteImage(field_name) } )
+                ;
+            }
+        }
+        else {
+
+            if ( $inLineImage.length ){
+
+                $tdImageContainer
+                    .empty()
+                    .removeClass('yes3-clickable')
+                    .append($inLineImage)
+                    .attr('title', Yes3.labels.no_clicks)
+                    .off('click')
+                ;
+
+                $inLineImage
+                    .removeClass('file-upload-inline')
+                    .addClass('yes3-file-upload-inline')
+                ;
+            }
+        }
+    })
+}
+
+Yes3.monitorBranching = function(){
 
     $('tr.yes3-inline-image-row, tr.yes3-textarea-row').each(function(){
 
@@ -173,9 +262,9 @@ Yes3.checkBranching = function(){
     })
 }
 
-Yes3.startBranchChecking = function(){
+Yes3.startMonitoring = function(){
 
-    setInterval(Yes3.checkBranching, 250);
+    setInterval(Yes3.monitor, Yes3.MONITOR_INTERVAL);
 }
 
 /**
@@ -196,14 +285,14 @@ Yes3.blobToBase64 = function(blob) {
 
 $(function(){
 
-    Yes3.processPastableFields();
+    Yes3.UI();
 
-    Yes3.relocateInlineImages();
+    //Yes3.relocateInlineImages();
 
-    Yes3.relocateTextFields();
+    //Yes3.UI_TextAreaFields();
 
-    Yes3.startBranchChecking();
-
+    Yes3.startMonitoring();
+/*
     document.addEventListener('DOMNodeInserted', function(e){
 
         if (e.target.nodeName.toUpperCase() === 'IMG' && 
@@ -235,9 +324,9 @@ $(function(){
 
                 //console.log('DOMNodeRemoved: edoc links removed', field_name, $container);
 
-                Yes3.processPastableFields();
+                Yes3.UI();
             }
         }
     })
-   
+*/   
 })

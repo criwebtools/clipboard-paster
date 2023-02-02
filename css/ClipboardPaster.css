@@ -22,6 +22,10 @@ div.yes3-uploadcontainer-label {
     background-color: white;
     color: gray;
     padding: 0.5em;
+}
+
+.yes3-inline-image-container.yes3-clickable {
+    
     cursor: pointer;
 }
 

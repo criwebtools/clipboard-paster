@@ -49,7 +49,7 @@ class ClipboardPaster extends \ExternalModules\AbstractExternalModule
                     'event_id':         '<?= $event_id ?>',
                     'group_id':         '<?= $group_id ?>',
                     'repeat_instance':  '<?= $repeat_instance ?>',
-                    'pastable_fields':  <?= json_encode( $fields ) ?>
+                    'pasteable_fields':  <?= json_encode( $fields ) ?>
                 }
 
                 <?= file_get_contents( $this->getUrl("js/ClipboardPaster.js") ) ?>
