@@ -1,0 +1,57 @@
+
+input.yes3-button:hover {
+
+    cursor: pointer;
+    background-color: tomato;
+    color: white;
+    font-weight: 600;
+}
+
+div.yes3-uploadcontainer-label {
+
+    width: calc( 100% - 160px );
+    float: left;
+    height: 2em;
+    line-height: 2em;
+}
+
+.yes3-inline-image-container {
+
+    width: 100%;
+    min-height: 50px;
+    background-color: white;
+    color: gray;
+    padding: 0.5em;
+    cursor: pointer;
+}
+
+img.yes3-file-upload-inline {
+
+    border: 1px solid lightgray;
+    float: left;
+    max-width: 100% !important;
+}
+
+td.yes3-textarea{
+
+    width: 100%;
+    background-color: white;
+    padding: 0.5em;
+}
+
+textarea.yes3-textarea {
+    width: 100%;
+    min-height: 50px;
+    background-color: white;
+    color: steelblue;
+    font-weight: 700;
+    padding: 0.5em;
+    resize: vertical !important;
+    border: 1px solid lightgray;
+}
+
+.yes3-error {
+
+    color: tomato;
+    font-weight: 800;
+}

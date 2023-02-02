@@ -1,0 +1,48 @@
+{
+    "name": "Clipboard Paster",
+
+    "namespace": "Yale\\ClipboardPaster",
+
+    "description": "Paste images from clipboard to upload field",
+
+    "prefix": "clipboard_paster",
+
+    "authors": [
+        {
+            "name": "Peter Charpentier",
+            "email": "redcap@yale.edu",
+            "role": "developer",
+            "institution": "Yale University"
+        },
+        {
+            "name": "Ethan Goldstein",
+            "email": "",
+            "role": "developer",
+            "institution": "Boston University"
+        }
+    ],
+
+    "permissions": [
+        "redcap_module_link_check_display",
+        "redcap_data_entry_form",
+        "redcap_data_entry_form_top"
+    ],
+
+    "project-settings": [
+    ],
+
+    "links": {
+        "project": [
+        ]
+    },
+
+    "no-auth-pages": [
+    ],
+
+    "compatibility": {
+        "php-version-min": "7.4",
+        "redcap-version-min": "12.0.4"
+    },
+
+    "framework-version": 9
+}
