@@ -10,11 +10,10 @@ use Exception;
 use REDCap;
 use Project;
 
-define('YES3_CLIPBOARD_PASTER_TAG', 'INLINE');
+define('YES3_CLIPBOARD_PASTER_TAG', 'INLINE'); // use the REDCap tag
 
 class ClipboardPaster extends \ExternalModules\AbstractExternalModule
 {
-
     /* === HOOK FUNCTIONS === */
 
     function redcap_data_entry_form ( $project_id, $record, $instrument, $event_id, $group_id, $repeat_instance = 1 ){
@@ -39,6 +38,7 @@ class ClipboardPaster extends \ExternalModules\AbstractExternalModule
 
             <script>
 
+                // namespace object for this EM
                 const Yes3 = {
 
                     'user':             '<?= $this->getUser()->getUsername() ?>',
@@ -57,12 +57,5 @@ class ClipboardPaster extends \ExternalModules\AbstractExternalModule
             </script>
 
         <?php
-
     }
-
-    function redcap_module_link_check_display($project_id, $link){
-
-        return $link; // display all links to all project staff
-    }
-
 }

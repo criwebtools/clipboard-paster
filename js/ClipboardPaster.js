@@ -7,9 +7,8 @@ Yes3.labels = {
 
 Yes3.UI = function(){
 
-
     /**
-     * Pasteable upload fields
+     * support for pasteable upload fields
      */
     Yes3.UI_PasteableUploadFields();
 
@@ -19,41 +18,14 @@ Yes3.UI = function(){
     Yes3.UI_TextAreaFields();
 
 }
-/*
-Yes3.relocateInlineImages = function() {
 
-    //$('tr.yes3-inline-image-row').remove();
-
-    $('img.file-upload-inline').each(function(){
-
-        if ( $(this).parent().hasClass('fileupload-container') ){
-
-            const field_name = $(this).parent().attr('id').split('-')[2];
-
-            //console.log('relocateInlineImages', field_name, this);
-
-            Yes3.relocateInlineImage( field_name, $(this) );
-        }
-    })
-}
-*/
-/*
-Yes3.relocateInlineImage = function( field_name, $img ) {
-
-    const $container = $(`td#yes3-inline-image-${field_name}`);
- 
-    $container
-        .empty()
-        .append($img)
-    ;
-
-    $img
-        .removeClass('file-upload-inline')
-        .addClass('yes3-file-upload-inline')
-    ;
-}
-*/
-
+/**
+ * Inserts a new full-width image container just below each upload
+ * field marked with @INLINE.
+ * 
+ * These 'pasteable fields' are identified in the EM hook function and
+ * passed in the global array Yes3.pasteable_fields.
+ */
 Yes3.UI_PasteableUploadFields = function() {
     
     for(let i=0; i<Yes3.pasteable_fields.length; i++){
@@ -72,13 +44,7 @@ Yes3.UI_PasteableUploadFields = function() {
                 'colspan': '2',
                 'class': 'yes3-inline-image-container yes3-clickable',
                 'data-field_name': Yes3.pasteable_fields[i],
-                'id': `yes3-inline-image-${Yes3.pasteable_fields[i]}`/*,
-                'text': Yes3.labels.click_to_paste,
-                'title': Yes3.labels.click_to_paste,
-                'click': function(){
-
-                    Yes3.pasteImage( Yes3.pasteable_fields[i] );
-                }*/
+                'id': `yes3-inline-image-${Yes3.pasteable_fields[i]}`
             }))
 
             $itemContainerRow.after( $imageRow );
@@ -86,6 +52,9 @@ Yes3.UI_PasteableUploadFields = function() {
     }
 }
 
+/**
+ * relocates each textarea field to a new full-width container just beneath the original container
+ */
 Yes3.UI_TextAreaFields = function() {
 
     const $textFields = $('textarea.notesbox');
@@ -121,6 +90,17 @@ Yes3.UI_TextAreaFields = function() {
 
 /**
  * ref: https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/read
+ * 
+ * TESTED ON v12.5
+ * 
+ * Uses the clipboard API to read image from the clipboard.
+ * Displays the image in the inserted full-width image container.
+ * Uploads the image by simulating a signature upload:
+ *  (1) Uses Filereader to convert image to base64 encoding.
+ *  (2) Opens the REDCap upload dialog with the REDCap filePopUp() function.
+ *  (3) Populates the myfile_base64 input with the base64 encoded image.
+ *      This is interpreted as a signature image in DataEntry/file_upload.php 
+ *  (4) Triggers the form's submit action.
  * 
  * @param {*} field_name 
  */
@@ -166,19 +146,20 @@ Yes3.pasteImage = async function ( field_name ) {
             $('form#form_file_upload').find('input[name=myfile_base64]').val(base64data);
 
             $('form#form_file_upload').trigger('submit');
-
         }
     }
-    catch (error) {
-        console.error(error.message);
+    catch (e) {
+        console.error(e);
+        alert('The paste operation failed: see the console log for details.');
     }
 }
 
+// displays a red 'not an image' message in the paste region for 3 seconds
 Yes3.notAnImage = function( field_name ){
 
     const $container = $(`td#yes3-inline-image-${field_name}`);
 
-    const holdText = $container.html();
+    const holdText = $container.html(); // hold for redisplay after 3 sec
 
     $container.html(`<span class='yes3-error'>No can do: the clipboard contains non-image data.`);
 
@@ -189,65 +170,18 @@ Yes3.notAnImage = function( field_name ){
 
 Yes3.monitor = function(){
 
-    Yes3.monitorBranching();
-    Yes3.monitorImages();
+    Yes3.monitorBranchingActions();
+    Yes3.monitorUploadFieldActions();
 }
 
-Yes3.monitorImages = function(){
-
-    $('tr.yes3-inline-image-row').each(function(){
-
-        const $prevRow = $(this).prev();
-
-        const field_name = $prevRow.attr('sq_id');
-
-        const hasData = $prevRow.find('a.filedownloadlink').is(':visible');
-
-        const $tdImageContainer = $(`td#yes3-inline-image-${field_name}`);
-
-        const $inLineImage = $prevRow.find('img.file-upload-inline');
-
-        if ( !hasData ){
-
-            if ( $tdImageContainer.find('img').length ) {
-
-                $tdImageContainer
-                    .empty()
-                ;
-            }
-
-            if ( !$tdImageContainer.html().length ){
-
-                $tdImageContainer
-                    .addClass('yes3-clickable')
-                    .attr('title', Yes3.labels.click_to_paste)
-                    .html(Yes3.labels.click_to_paste)
-                    .on('click', function(){ Yes3.pasteImage(field_name) } )
-                ;
-            }
-        }
-        else {
-
-            if ( $inLineImage.length ){
-
-                $tdImageContainer
-                    .empty()
-                    .removeClass('yes3-clickable')
-                    .append($inLineImage)
-                    .attr('title', Yes3.labels.no_clicks)
-                    .off('click')
-                ;
-
-                $inLineImage
-                    .removeClass('file-upload-inline')
-                    .addClass('yes3-file-upload-inline')
-                ;
-            }
-        }
-    })
-}
-
-Yes3.monitorBranching = function(){
+/**
+ * Reacts to branching logic affecting textarea fields managed by this EM.
+ * Specifically, shows or hides the inserted rows
+ * that contain the relocated inline images and textarea controls,
+ * based on the visibility of the original field rows
+ * which now contain the field labels and sundries.
+ */
+Yes3.monitorBranchingActions = function(){
 
     $('tr.yes3-inline-image-row, tr.yes3-textarea-row').each(function(){
 
@@ -262,6 +196,75 @@ Yes3.monitorBranching = function(){
     })
 }
 
+/**
+ * Reacts to user paste, upload and remove actions:
+ *  (1) After upload: Relocates inline image to the inserted full-width container.
+ *  (2) After remove: Empties the inserted full-width container
+ */
+Yes3.monitorUploadFieldActions = function(){
+
+    // loop through all the inserted full-width image container rows
+    $('tr.yes3-inline-image-row').each(function(){
+
+        const $prevRow = $(this).prev(); // the original field row
+
+        const field_name = $prevRow.attr('sq_id');
+
+        // infers that the upload field is populated based on the presence of the 'download' link
+        const hasData = $prevRow.find('a.filedownloadlink').is(':visible');
+
+        // The inserted full-width image container
+        const $fullwidthImageContainer = $(`td#yes3-inline-image-${field_name}`);
+
+        // The normal REDCap inline image
+        // after form render or upload the inline image will displayed 
+        // in the original field row (and must be moved).
+        const $inLineImage = $prevRow.find('img.file-upload-inline');
+
+        if ( !hasData ){
+
+            // if upload has been removed but relocated upload image remains, remove it
+            $fullwidthImageContainer.find('img').remove();
+
+            // if relocated image container is empty (no image or 'click here..' text),
+            // populate it with the default 'click here..' message and add the listener
+            if ( !$fullwidthImageContainer.html().length ){
+
+                $fullwidthImageContainer
+                    .addClass('yes3-clickable')
+                    .attr('title', Yes3.labels.click_to_paste)
+                    .html(Yes3.labels.click_to_paste)
+                    .off('click')
+                    .on('click', function(){ Yes3.pasteImage(field_name) } )
+                ;
+            }
+        }
+        else {
+            // Upload field populated with REDCap inline image still displayed,
+            // so relocate image to inserted fill-width image container.
+            if ( $inLineImage.length ){
+
+                $fullwidthImageContainer
+                    .empty()
+                    .removeClass('yes3-clickable')
+                    .append($inLineImage)
+                    .attr('title', Yes3.labels.no_clicks)
+                    .off('click')
+                ;
+
+                // Replace the image styling class
+                $inLineImage
+                    .removeClass('file-upload-inline')
+                    .addClass('yes3-file-upload-inline')
+                ;
+            }
+        }
+    })
+}
+
+/**
+ * A mutation monitor, tailored to branching, upload and paste actions
+ */
 Yes3.startMonitoring = function(){
 
     setInterval(Yes3.monitor, Yes3.MONITOR_INTERVAL);
@@ -279,54 +282,13 @@ Yes3.blobToBase64 = function(blob) {
     return new Promise((resolve, _) => {
       const reader = new FileReader();
       reader.onloadend = () => resolve(reader.result.split(',')[1]);
-      reader.readAsDataURL(blob);
+      reader.readAsDataURL(blob); // returns base64 encoded data
     });
 }
 
 $(function(){
 
-    Yes3.UI();
+    Yes3.UI(); // UI renovations
 
-    //Yes3.relocateInlineImages();
-
-    //Yes3.UI_TextAreaFields();
-
-    Yes3.startMonitoring();
-/*
-    document.addEventListener('DOMNodeInserted', function(e){
-
-        if (e.target.nodeName.toUpperCase() === 'IMG' && 
-            e.target.className.indexOf('file-upload-inline') !== -1 &&
-            e.relatedNode.className.indexOf('fileupload-container') !== -1) {
-
-            Yes3.relocateInlineImages();
-
-            //console.log("IMAGE UPLOADED", e);
-        }
-    })
-
-    document.addEventListener('DOMNodeRemoved', function(e){
-
-        //console.log("DOMNodeRemoved", e, e.target, e.target.className);
-
-        if ( e.target.className && e.target.className.indexOf('edoc-link') !== -1 ){
-
-            const $container = $(`td#yes3-inline-image-${field_name}`);
-
-            if ( $container.length ){
-
-                const field_name = e.relatedNode.id.split('-')[0];
-
-                $container
-                    .empty()
-                    .html( $container.attr('title') )
-                ;
-
-                //console.log('DOMNodeRemoved: edoc links removed', field_name, $container);
-
-                Yes3.UI();
-            }
-        }
-    })
-*/   
+    Yes3.startMonitoring(); // start the mutation monitor (branching, pasting, upload reactions)
 })

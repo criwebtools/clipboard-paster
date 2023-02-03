@@ -1,12 +1,3 @@
-
-input.yes3-button:hover {
-
-    cursor: pointer;
-    background-color: tomato;
-    color: white;
-    font-weight: 600;
-}
-
 div.yes3-uploadcontainer-label {
 
     width: calc( 100% - 160px );
