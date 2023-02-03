@@ -53,7 +53,8 @@ Yes3.UI_PasteableUploadFields = function() {
 }
 
 /**
- * relocates each textarea field to a new full-width container just beneath the original container
+ * Relocates each notes field to a new full-width container just beneath the original container
+ * (which retains label and history/comment buttons).
  */
 Yes3.UI_TextAreaFields = function() {
 
@@ -175,9 +176,9 @@ Yes3.monitor = function(){
 }
 
 /**
- * Reacts to branching logic affecting textarea fields managed by this EM.
+ * Reacts to branching logic affecting notes fields managed by this EM.
  * Specifically, shows or hides the inserted rows
- * that contain the relocated inline images and textarea controls,
+ * that contain the relocated inline images and notes controls,
  * based on the visibility of the original field rows
  * which now contain the field labels and sundries.
  */

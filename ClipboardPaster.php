@@ -2,15 +2,8 @@
 
 namespace Yale\ClipboardPaster;
 
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
-error_reporting(E_ALL);
-
-use Exception;
-use REDCap;
-use Project;
-
-define('YES3_CLIPBOARD_PASTER_TAG', 'INLINE'); // use the REDCap tag
+// use the REDCap tag to identify pasteable fields
+define('YES3_CLIPBOARD_PASTER_TAG', 'INLINE');
 
 class ClipboardPaster extends \ExternalModules\AbstractExternalModule
 {
