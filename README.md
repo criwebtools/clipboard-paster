@@ -1,2 +1,2 @@
-# yes3-bugtracker
-a simple bug tracker for YES3
+# clipboard-paster
+## Paste images from the clipboard into REDCap file upload fields, and more.
