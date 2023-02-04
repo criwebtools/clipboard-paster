@@ -1,8 +1,11 @@
 Yes3.MONITOR_INTERVAL = 200; // branching and image relocation loop
 
+Yes3.windowNumber = 0; // used in the naming of popups
+
 Yes3.labels = {
     'click_to_paste': 'Click here to paste an image from the clipboard.',
-    'no_clicks': 'To replace this image, first remove it.'
+    'remove_before_replace': 'To replace this image, first remove it.',
+    'double_click_to_open': 'Double-click to view full-size image in a separate window.'
 }
 
 Yes3.UI = function(){
@@ -17,6 +20,7 @@ Yes3.UI = function(){
      */
     Yes3.UI_TextAreaFields();
 
+    Yes3.UI_Copyright();
 }
 
 /**
@@ -87,6 +91,39 @@ Yes3.UI_TextAreaFields = function() {
         // remove the 'expand' link
         $(`div#${field_name}-expand`).remove();
     });
+}
+
+Yes3.UI_Copyright = function(){
+
+    $('div#south td:nth-child(2)').append(`<span class='nowrap'>&nbsp;|&nbsp;Clipboard Paster &copy;2023 by REDCap@Yale.</span>`)
+}
+
+Yes3.openInlineImage = function( img ) {
+
+    let w = img.naturalWidth;
+    let h = img.naturalHeight;
+
+    let r = h / w;
+
+    let W = window.innerWidth;
+    let H = window.innerHeight;
+
+    if ( w > W ){
+
+        w = W;
+
+        h = W * r;
+    }
+
+    const popup = Yes3.openPopupWindow( img.src, w, h );
+
+    if ( !popup ){
+
+        console.log('popup blocked');
+
+        // open in tab
+        window.open( img.src, '_blank' );
+    }
 }
 
 /**
@@ -238,6 +275,7 @@ Yes3.monitorUploadFieldActions = function(){
                     .off('click')
                     .on('click', function(){ Yes3.pasteImage(field_name) } )
                 ;
+
             }
         }
         else {
@@ -249,9 +287,17 @@ Yes3.monitorUploadFieldActions = function(){
                     .empty()
                     .removeClass('yes3-clickable')
                     .append($inLineImage)
-                    .attr('title', Yes3.labels.no_clicks)
+                    .attr('title', Yes3.labels.double_click_to_open + "\n" + Yes3.labels.remove_before_replace)
                     .off('click')
                 ;
+
+                $fullwidthImageContainer.find('img')
+                    //.off('click')
+                    .off('dblclick')
+                    //.on('click', function(){Yes3.openInlineImage( this )})
+                    .on('dblclick', function(){Yes3.openInlineImage( this )})
+                ;
+                
 
                 // Replace the image styling class
                 $inLineImage
@@ -287,7 +333,46 @@ Yes3.blobToBase64 = function(blob) {
     });
 }
 
+/**
+ * opens a window centered on the screen
+ * 
+ * @param {*} url 
+ * @param {*} w 
+ * @param {*} h 
+ * @param {*} windowNamePrefix 
+ * @returns 
+ */
+Yes3.openPopupWindow = function(url, w, h, windowNamePrefix) {
+
+    w = w || 800;
+    h = h || 600;
+    windowNamePrefix = windowNamePrefix || "ClipboardPaster";
+
+    Yes3.windowNumber++;
+
+    let windowName = windowNamePrefix+Yes3.windowNumber;
+
+    // Fixes dual-screen position                         Most browsers      Firefox
+    let dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : window.screenX;
+    let dualScreenTop = window.screenTop != undefined ? window.screenTop : window.screenY;
+
+    let width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+    let height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+
+    let left = ((width / 2) - (w / 2)) + dualScreenLeft;
+    let top = ((height / 2) - (h / 2)) + dualScreenTop;
+    let newWindow = window.open(url, windowName, 'width=' + w + ',height=' + h + ',top=' + top + ',left=' + left);
+
+    if(!newWindow || newWindow.closed || typeof newWindow.closed=='undefined')   {
+        return false;
+    }
+
+    return true;
+}
+
 $(function(){
+
+    console.log('welcome to clipboard paster');
 
     Yes3.UI(); // UI renovations
 
