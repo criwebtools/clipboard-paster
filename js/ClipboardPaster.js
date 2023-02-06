@@ -137,18 +137,22 @@ Yes3.openInlineImage = function( img ) {
 
     let w = img.naturalWidth;
     let h = img.naturalHeight;
-/*
-    let r = h / w;
 
     let W = window.innerWidth;
+    let H = window.innerHeight;
 
     if ( w > W ){
 
         w = W;
-
-        h = W * r;
     }
-*/
+
+    if ( h > H ){
+
+        h = H;
+    }
+
+    console.log(w, h);
+
     const popup = Yes3.openPopupWindow( img.src, w+1, h+1 );
 
     if ( !popup ){
@@ -288,7 +292,9 @@ Yes3.Monitor_UploadFieldActions = function(){
         // in the original field row (and must be moved).
         const $inLineImage = $fileUploadContainer.find('img.file-upload-inline');
 
-        const hasData = $fileUploadContainer.find(`a#${field_name}-link`).is(':visible');
+        //const hasData = $fileUploadContainer.find(`a#${field_name}-link`).is(':visible');
+
+        const hasData = $hasDataLinkContainer.length;
 
         if ( hasData && $inLineImage.length && !$inLineImage.hasClass('yes3-handled')) {
 
