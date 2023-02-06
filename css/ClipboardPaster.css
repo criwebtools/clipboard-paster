@@ -1,3 +1,20 @@
+html {
+
+    --yes3-attention: orangered;
+    --yes3-warning: darkorange;
+    --yes3-danger: indianred;
+
+    --yes3-color: rgb(48, 48, 48);
+    --yes3-subtle: gray;
+    --yes3-background: white;
+    --yes3-border: lightgray;
+
+    --yes3-input: rgb(48, 48, 48);
+    --yes3-input-background: white;
+
+    --yes3-paste-link: purple;
+}
+
 div.yes3-uploadcontainer-label {
 
     width: calc( 100% - 160px );
@@ -10,9 +27,10 @@ div.yes3-uploadcontainer-label {
 
     width: 100%;
     min-height: 50px;
-    background-color: white;
-    color: gray;
+    background-color: var(--yes3-background);
+    color: var(--yes3-color);
     padding: 0.5em;
+    display: none;
 }
 
 .yes3-inline-image-container.yes3-clickable {
@@ -22,7 +40,7 @@ div.yes3-uploadcontainer-label {
 
 img.yes3-file-upload-inline {
 
-    border: 1px solid lightgray;
+    border: 1px solid var(--yes3-border);
     float: left;
     max-width: 100% !important;
 }
@@ -30,23 +48,86 @@ img.yes3-file-upload-inline {
 td.yes3-textarea{
 
     width: 100%;
-    background-color: white;
+    color: var(--yes3-color);
+    background-color: var(--yes3-background);
     padding: 0.5em;
 }
 
 textarea.yes3-textarea {
     width: 100%;
     min-height: 50px;
-    background-color: white;
-    color: steelblue;
-    font-weight: 700;
+    color: var(--yes3-input);
+    background-color: var(--yes3-input-background);
+    font-weight: 600;
     padding: 0.5em;
     resize: vertical !important;
-    border: 1px solid lightgray;
+    border: 1px solid var(--yes3-border);
 }
 
 .yes3-error {
 
-    color: tomato;
+    color: var(--yes3-danger);
     font-weight: 800;
+}
+
+.yes3-paste-link {
+    white-space: nowrap;
+}
+
+.yes3-paste-link a {
+    margin-left: 0;
+    font-weight: normal;
+    text-align: left;
+    color: var(--yes3-paste-link) !important;
+}
+
+.yes3-paste-link * {
+
+    font-size: inherit;
+}
+
+.yes3-paste-link a:hover{
+
+    cursor: pointer;
+    color: var(--yes3-attention) !important;
+}
+
+.fileupload-container {
+
+    white-space: nowrap !important;
+}
+
+.yes3-error-message-container {
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    border: 3px solid var(--yes3-danger);
+    padding: 10px;
+    color: var(--yes3-danger);
+    background-color: var(--yes3-background);
+    font-size: 1em;
+    font-weight: 700;
+    z-index: 1000;
+    max-width: 450px;
+}
+
+.yes3-error-message-container:hover {
+
+    cursor: pointer;
+}
+
+.yes3-subtle{
+
+    color: var(--yes3-subtle);
+}
+
+.yes3-small {
+
+    font-size: 10px;
+}
+
+.yes3-centered {
+
+    text-align: center;
 }

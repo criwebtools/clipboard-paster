@@ -3,7 +3,9 @@
 
     "namespace": "Yale\\ClipboardPaster",
 
-    "description": "Paste images from clipboard to upload field",
+    "description": "Paste images (e.g. screenshots) directly from the clipboard to an upload field, and more.",
+
+    "documentation": "https://github.com/yale-redcap/clipboard-paster#readme",
 
     "prefix": "clipboard_paster",
 
@@ -17,7 +19,7 @@
         {
             "name": "Ethan Goldstein",
             "email": "",
-            "role": "developer",
+            "role": "designer",
             "institution": "Boston University"
         }
     ],
@@ -27,6 +29,31 @@
     ],
 
     "project-settings": [
+        {
+            "key": "introduction-1",
+            "name": "<h4>Welcome to the Clipboard Paster</h4><p>The Clipboard Paster adds the following features to REDCap:<p><ol><li>Images stored in the clipboard (e.g. screenshots) may be pasted into file upload fields designated as @INLINE.</li><li>Double-clicking on an inline image will open it into a new window or tab, sized to the underlying dimensions if the image.</li><li>Inline images may optionally be displayed in full-width containers placed just below the form fields.</li><li>Notes fields may optionally be reformatted to full-with, resizeable input controls.</li></ol>",
+            "type": "descriptive"
+        },
+        {
+            "key": "upload_field_layout",
+            "name": "File upload inline image display layout",
+            "type": "radio",
+            "required": false,
+            "choices": [
+                {"value":"normal", "name": "Normal (default)"},
+                {"value":"enhanced", "name": "Full-width"}
+            ]
+        },
+        {
+            "key": "notes_field_layout",
+            "name": "Notes/paragraph field input layout",
+            "type": "radio",
+            "required": false,
+            "choices": [
+                {"value":"normal", "name": "Normal (default)"},
+                {"value":"enhanced", "name": "Full-width"}
+            ]
+        }
     ],
 
     "links": {
@@ -39,7 +66,7 @@
 
     "compatibility": {
         "php-version-min": "7.4",
-        "redcap-version-min": "12.0.4"
+        "redcap-version-min": "12.4"
     },
 
     "framework-version": 9
