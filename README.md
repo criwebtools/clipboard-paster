@@ -28,17 +28,21 @@ As you see, the only user interface change is the addition of the 'Paste image' 
 
 ![image of a form after enabling the Clipboard Paster EM](images/example1.png)
 
-### After pasting an image
+### Pasting an image
 
-Here I have (1) copied an image (from a website, in this case, using 'copy image') and then (2) clicked on the 'Paste image' link. As you see, the image has been stored and is now displayed as an inline image. *Note that the 'Paste image' link is still present, except that it has been reduced to an icon.* The link label has been crowded out by the newly-rendered 'Upload new version', 'remove file' and 'Send-it' links.
-
-Note that in this example, I clicked on an image on a web page, right-clicked and selected 'copy image' to place the image in the clipboard. The more common use-case for this feature will be to use a screen grabber like the Windows 'snipping' tool, the PrtSc button or the powerful Greenshot tool (https://getgreenshot.org/). Just take your shot and click the Paste image link!
+Here I have (1) copied an image from a website and then (2) clicked on the 'Paste image' link. As you see, the image has been stored and is now displayed as an inline image. 
 
 ![image of a form after pasting an image](images/example2.png)
 
-Next I'll demonstrate the optional form rendering enhancements, but in passing I will first double-click on the inline image. As you see, it opens into a separate browser window sized to fit the original image. Now I can more closely examine the image, or move it to another screen as I look over the bug report. Note that this feature is enabled for all inline fields, not just those that contain pasted images.
+Note that the 'Paste image' link is still present for the upload field into which I just pasted the image, except that it has been reduced to an icon. The link label has been crowded out by the newly-rendered 'Upload new version', 'remove file' and 'Send-it' links.
+
+Note that in this example, I clicked on an image on a web page, right-clicked and selected 'copy image' to place the image in the clipboard. The more common use-case for this feature will be to use a screen grabber like the Windows 'snipping' tool, the PrtSc button or the powerful Greenshot tool (https://getgreenshot.org/). Just take your shot and click the Paste image link!
+
+Next I'll demonstrate the optional form rendering enhancements, but in passing I will first double-click on the inline image. As you see, it opens into a separate browser window sized to fit the original image. 
 
 ![image of a form after double-clicking on an inline image](images/example3.png)
+
+Now I can more closely examine the image, or move it to another screen as I look over the bug report. Note that this feature is enabled for all inline fields, not just those that contain pasted images.
 
 ## Optional enhancements
 
