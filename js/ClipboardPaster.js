@@ -166,13 +166,19 @@ Yes3.openInlineImage = function( img ) {
  * TESTED ON v12.5
  * 
  * Uses the clipboard API to read image from the clipboard.
- * Displays the image in the inserted full-width image container.
+ * 
  * Uploads the image by simulating a signature upload:
  *  (1) Uses Filereader to convert image to base64 encoding.
  *  (2) Opens the REDCap upload dialog with the REDCap filePopUp() function.
  *  (3) Populates the myfile_base64 input with the base64 encoded image.
  *      This is interpreted as a signature image in DataEntry/file_upload.php 
  *  (4) Triggers the form's submit action.
+ * 
+ * After the form is submitted, the inline image is rendered by REDCap.
+ * 
+ * Within 100ms the 'mutation monitor' Yes3.Monitor_UploadFieldActions() will pick up the image rendering,
+ * and if the enhanced UI setting is selected, will relocate the image to the full-width container
+ * that was injected on form load by Yes3.UI_UploadFields().
  * 
  * @param {*} field_name 
  */
