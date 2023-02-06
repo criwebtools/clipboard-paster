@@ -12,15 +12,9 @@
     "authors": [
         {
             "name": "Peter Charpentier",
-            "email": "redcap@yale.edu",
-            "role": "developer",
-            "institution": "Yale University"
-        },
-        {
-            "name": "Ethan Goldstein",
-            "email": "",
-            "role": "designer",
-            "institution": "Boston University"
+            "email": "criwebtools@gmail.com",
+            "role": "designer, developer",
+            "institution": "CRI Web Tools LLC, Yale University"
         }
     ],
 
