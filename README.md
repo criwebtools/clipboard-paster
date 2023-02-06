@@ -33,9 +33,11 @@ As you see, the only user interface change is the addition of the 'Paste image' 
 
 Here I have (1) copied an image (from a website, in this case, using 'copy image') and then (2) clicked on the 'Paste image' link. As you see, the image has been stored and is now displayed as an inline image. *Note that the 'Paste image' link is still present, except that it has been reduced to an icon.* The link label has been crowded out by the newly-rendered 'Upload new version', 'remove file' and 'Send-it' links.
 
+Note that in this example, I clicked on an image on a web page, right-clicked and selected 'copy image' to place the image in the clipboard. The more common use-case for this feature will be to use a screen grabber like the Windows 'snipping' tool, the PrtSc button or the powerful Greenshot tool (https://getgreenshot.org/). Just take your shot and click the Paste image link!
+
 ![image of a form after pasting an image](images/example2.png)
 
-Next I'll demonstrate the optional form rendering enhancements, but in passing I will first double-click on the inline image. As you see, it opens into a separate browser window sized to fit the original image. Now I can more closely examine the image, or move it to another screen as I look over the bug report.
+Next I'll demonstrate the optional form rendering enhancements, but in passing I will first double-click on the inline image. As you see, it opens into a separate browser window sized to fit the original image. Now I can more closely examine the image, or move it to another screen as I look over the bug report. Note that this feature is enabled for all inline fields, not just those that contain pasted images.
 
 ![image of a form after double-clicking on an inline image](images/example3.png)
 
@@ -43,9 +45,31 @@ Next I'll demonstrate the optional form rendering enhancements, but in passing I
 
 ### The EM configuration settings
 
-The optional enhancements are enabled through the usual EM conguration link, as shown below.
+The optional enhancements are enabled through the usual EM conguration link, as shown below. Here I have set both to 'enhanced', meaning that I want full-width renderings of both inline images and notes fields.
 
 ![image of the EM configuration settions](images/example4.png)
+
+... and here is what the full treatment looks like! As you see, the inline image now occupies a full row on the form, as do all text fields. I have resized the 'steps to reproduce the error' notes box by dragging the lower-right corner down.
+
+![image of the EM configuration settions](images/example5.png)
+
+## Error handling
+
+### Trying to paste an empty clipboard, or one with something other than an image in it
+
+The clipboard can store any sort of object, and so if the last thing you copied was not an image, or if there's nothing in the clipboard, you will behold this message:
+
+![image of an error message](images/example5.png)
+
+The message box will go away after 10 seconds, or if you click on it.
+
+All 'handled' Clipboard Paster errors will generate messages as above. If an unhandled condition is encountered, please get back to us at redcap@yale.edu.
+
+
+
+
+
+
 
 
 
