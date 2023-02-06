@@ -326,7 +326,7 @@ Yes3.Monitor_UploadFieldActions = function(){
                 'title': Yes3.labels.click_to_paste,
                 'style': `font-size:${pasteLinkFontSize};`,
                 'aria-label': Yes3.labels.click_to_paste,
-                'html': ( hasData ) ? "<i class='far fa-paste mr-1'></i>" : "<i class='far fa-paste mr-1'></i>Paste image"
+                'html': ( hasData ) ? "<i class='fa fa-clipboard mr-1'></i>" : "<i class='fa fa-clipboard mr-1'></i>Paste image"
             }).on('click', function(){Yes3.pasteImage(field_name)} );
 
             $pasteLinkContainer.append( $delim );
@@ -346,7 +346,7 @@ Yes3.Monitor_UploadFieldActions = function(){
                 $(this).css('padding-right', padR+'px');
                 $(this).css('padding-left', padL+'px');
 
-                console.log('linkContainer', field_name, this, $(this).css('padding-right'), padL, padR, $(this).html().indexOf('&nbsp;'));
+                //console.log('linkContainer', field_name, this, $(this).css('padding-right'), padL, padR, $(this).html().indexOf('&nbsp;'));
             })
 
             /**
@@ -356,7 +356,7 @@ Yes3.Monitor_UploadFieldActions = function(){
 
                 $hasDataLinkContainer.html( $hasDataLinkContainer.html().replaceAll('&nbsp;', '') );
 
-                console.log( 'check ==>', $hasDataLinkContainer.html() );
+                //console.log( 'check ==>', $hasDataLinkContainer.html() );
 
                 // remove the file name if this is an image paste, since it looks strange
                 $(`a#${field_name}-link`).find('span').text('download');

@@ -11,9 +11,9 @@ class ClipboardPaster extends \ExternalModules\AbstractExternalModule
 
     function redcap_data_entry_form ( $project_id, $record, $instrument, $event_id, $group_id, $repeat_instance = 1 ){
 
-        $sql = "SELECT `field_name` FROM `redcap_metadata` WHERE `project_id`=? AND `form_name`=? AND `misc` LIKE CONCAT('%@', ?, '%')";
+        $sql = "SELECT `field_name` FROM `redcap_metadata` WHERE `project_id`=? AND `form_name`=? AND `misc` LIKE '%INLINE%'";
 
-        if ( !$result = $this->query($sql, [$project_id, $instrument, YES3_CLIPBOARD_PASTER_TAG]) ) return;
+        if ( !$result = $this->query($sql, [$project_id, $instrument]) ) return;
 
         $fields = [];
 
