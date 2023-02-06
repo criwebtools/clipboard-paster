@@ -5,6 +5,8 @@
 
     "description": "Paste images (e.g. screenshots) directly from the clipboard to an upload field, and more.",
 
+    "documentation": "https://github.com/yale-redcap/clipboard-paster#readme",
+
     "prefix": "clipboard_paster",
 
     "authors": [

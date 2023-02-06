@@ -59,7 +59,7 @@ The optional enhancements are enabled through the usual EM conguration link, as 
 
 The clipboard can store any sort of object, and so if the last thing you copied was not an image, or if there's nothing in the clipboard, you will behold this message:
 
-![image of an error message](images/example5.png)
+![image of an error message](images/example6.png)
 
 The message box will go away after 10 seconds, or if you click on it.
 
