@@ -58,7 +58,7 @@ The optional enhancements are enabled through the usual EM conguration link, as 
 
 ## Error handling
 
-### Trying to paste an empty clipboard, or one with something other than an image in it
+### Paste errors
 
 The clipboard can store any sort of object, and so if the last thing you copied was not an image, or if there's nothing in the clipboard, you will behold this message:
 
