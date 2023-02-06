@@ -38,7 +38,7 @@ Yes3.UI = function(){
     /**
      * textarea relocations
      */
-    if ( Yes3.notes_field_layout!=='normal' ){
+    if ( Yes3.notes_field_layout==='enhanced' ){
         
         Yes3.UI_NotesFields();
     }
@@ -57,7 +57,7 @@ Yes3.UI_UploadFields = function() {
     
     for(let i=0; i<Yes3.pasteable_fields.length; i++){
 
-        if ( Yes3.upload_field_layout==='normal' ){
+        if ( Yes3.upload_field_layout!=='enhanced' ){
 
             continue;
         }
@@ -137,7 +137,7 @@ Yes3.openInlineImage = function( img ) {
 
     let w = img.naturalWidth;
     let h = img.naturalHeight;
-
+/*
     let r = h / w;
 
     let W = window.innerWidth;
@@ -148,8 +148,8 @@ Yes3.openInlineImage = function( img ) {
 
         h = W * r;
     }
-
-    const popup = Yes3.openPopupWindow( img.src, w, h );
+*/
+    const popup = Yes3.openPopupWindow( img.src, w+1, h+1 );
 
     if ( !popup ){
 
@@ -295,10 +295,7 @@ Yes3.Monitor_UploadFieldActions = function(){
         }
 
         /**
-         * Insert the paste link if:
-         * 
-         *  (1) the 'paste' link is not already rendered and
-         *  (2) the upload field is not populated (paste is allowed for empty upload fields only)
+         * Insert the paste link if not already rendered
          */
         if ( !$fileUploadContainer.find('.yes3-paste-link').length){
 
@@ -347,18 +344,23 @@ Yes3.Monitor_UploadFieldActions = function(){
             })
 
             /**
-             * the link container upload fields already having data (e.g., remove, replace links) contain an annoying trailing hard space
+             * the 'edoc' link container has an annoying trailing hard space
              */
             if ( hasData ){
 
                 $hasDataLinkContainer.html( $hasDataLinkContainer.html().replaceAll('&nbsp;', '') );
+
+                console.log( 'check ==>', $hasDataLinkContainer.html() );
+
+                // remove the file name if this is an image paste, since it looks strange
+                $(`a#${field_name}-link`).find('span').text('download');
             }
         }
 
         /**
          * all done if the enhanced layout is disabled
          */
-        if ( Yes3.upload_field_layout === 'normal' ){
+        if ( Yes3.upload_field_layout !== 'enhanced' ){
 
             continue;
         }

@@ -38,8 +38,8 @@
             "type": "radio",
             "required": false,
             "choices": [
-                {"value":"enhanced", "name": "Full-width (default)"},
-                {"value":"normal", "name": "Normal"}
+                {"value":"normal", "name": "Normal (default)"},
+                {"value":"enhanced", "name": "Full-width"}
             ]
         },
         {
@@ -48,8 +48,8 @@
             "type": "radio",
             "required": false,
             "choices": [
-                {"value":"enhanced", "name": "Full-width (default)"},
-                {"value":"normal", "name": "Normal"}
+                {"value":"normal", "name": "Normal (default)"},
+                {"value":"enhanced", "name": "Full-width"}
             ]
         }
     ],
