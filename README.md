@@ -104,7 +104,7 @@ All 'handled' Clipboard Paster errors will generate messages as above. If an unh
 
 2. If the full-width notes field is selected in the EM settings, fuill-width containers are injected *below* each notes field, and the textarea input controls are relocated to them.
 
-3. If either of the full-width view options is selected in the EM settings, a 'mutation monitor' process is launched. The mutation monitor reacts to newly-rendered inline images, and fields that have been newly hidden or displayed via branching rules. The interval between mutation checks is 100ms.
+3. A 'mutation monitor' process is launched. The mutation monitor reacts to newly-rendered inline images, and fields that have been newly hidden or displayed via branching rules. The interval between mutation checks is 100ms.
 
 ## When the 'paste image' link is clicked ##
 
