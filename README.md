@@ -54,7 +54,7 @@ The optional enhancements are enabled through the usual EM conguration link, as 
 
 ![image of the EM configuration settions](images/example4.png)
 
-... and here is what the full treatment looks like! As you see, the inline image now occupies a full row on the form, as do all text fields. I have resized the 'steps to reproduce the error' notes box by dragging the lower-right corner down.
+... and here is what the full treatment looks like! As you see, the inline image now occupies a full row on the form, as do all text fields. I have resized the bug description notes box by dragging the lower-right corner down.
 
 ![image of the EM configuration settions](images/example5.png)
 
@@ -98,15 +98,15 @@ All 'handled' Clipboard Paster errors will generate messages as above. If an unh
 
 # How it works
 
-When the REDCap form is rendered:
+## When the REDCap form is rendered ##
 
-1. If the full-width image view is selected in the EM settings, full-width containers are injected below each upload field marked with the @INLINE tag.
+1. If the full-width image view is selected in the EM settings, full-width containers are injected below *above* each upload field marked with the @INLINE tag.
 
-2. If the full-width notes field is selected in the EM settings, fuill-width containers are injected below each notes field, and the textarea input controls are relocated to them.
+2. If the full-width notes field is selected in the EM settings, fuill-width containers are injected *below* each notes field, and the textarea input controls are relocated to them.
 
-3. A 'mutation monitor' process is launched, that checks for changes in the UI such as new inline image renderings. The interval between mutation checks is 100ms.
+3. If either of the full-width view options is selected in the EM settings, a 'mutation monitor' process is launched. The mutation monitor reacts to newly-rendered inline images, and fields that have been newly hidden or displayed via branching rules. The interval between mutation checks is 100ms.
 
-When the 'paste image' link is clicked, the following actions ensue:
+## When the 'paste image' link is clicked ##
 
 1. The contents of the clipboard are fetched by the Clipboard Web API (https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/read) and converted to a base64-encoded string using the FileReader Web API (https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsDataURL).
 
@@ -119,6 +119,10 @@ When the 'paste image' link is clicked, the following actions ensue:
 5. REDCap uploads the image string, and then renders it as an inline image.
 
 6. Within 100ms the mutation monitor will pick up the newly-rendered image, and if the enhanced image view option is configured in the EM settings, will relocate the image to the full-width image container.
+
+## Branching rules support
+
+If the mutation monitor picks up an 'enhanced' field that has been newly hidden or displayed as the result of a data entry branching rule, the visibility of its associated full-width enhancement container is set accordingly.
 
 
 

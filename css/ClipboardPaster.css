@@ -8,7 +8,8 @@ html {
     --yes3-subtle: gray;
     --yes3-background: white;
     --yes3-border: lightgray;
-    --yes3-divider: rgb(200,200,200);
+    --yes3-divider: rgb(224,224,224);
+    --yes3-divider-background: rgb(96,96,96);
 
     --yes3-input: rgb(48, 48, 48);
     --yes3-input-background: white;
@@ -18,7 +19,7 @@ html {
 
 tr.yes3-textarea-parent-row {
 
-    border-top: 2px solid var(--yes3-divider) !important;
+    /*border-top: 2px solid var(--yes3-divider) !important;*/
 }
 
 div.yes3-uploadcontainer-label {
@@ -31,7 +32,7 @@ div.yes3-uploadcontainer-label {
 
 .yes3-uploadcontainer-row{
 
-    border-bottom: 2px solid var(--yes3-divider);
+    /*border-bottom: 2px solid var(--yes3-divider);*/
 }
 
 .yes3-inline-image-container {
@@ -149,4 +150,11 @@ textarea.yes3-textarea {
 .yes3-centered {
 
     text-align: center;
+}
+
+.header {
+
+    background-color: var(--yes3-divider-background);
+    border-color: var(--yes3-divider-background);
+    color: var(--yes3-divider);
 }

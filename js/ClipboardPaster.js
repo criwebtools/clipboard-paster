@@ -532,5 +532,5 @@ $(function(){
 
     Yes3.UI(); // UI renovations
 
-    Yes3.startMonitoring(); // start the mutation monitor (branching, pasting, upload reactions)
+    Yes3.startMonitoring(); 
 })
