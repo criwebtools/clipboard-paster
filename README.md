@@ -94,11 +94,15 @@ The clipboard can store any sort of object, and so if the last thing you copied 
 
 The message box will go away after 10 seconds, or if you click on it.
 
-All 'handled' Clipboard Paster errors will generate messages as above. If an unhandled condition is encountered, please get back to us at redcap@yale.edu.
+*** Other errors ***
 
-# How it works
+All 'handled' Clipboard Paster errors - including browser permission errors - will generate messages as above. If an unhandled condition is encountered, please get back to us at redcap@yale.edu.
 
-## When the REDCap form is rendered ##
+# Technical Appendix 
+
+## How it works
+
+### When the REDCap form is rendered ##
 
 1. If the full-width image view is selected in the EM settings, full-width containers are injected below *above* each upload field marked with the @INLINE tag.
 
@@ -106,7 +110,7 @@ All 'handled' Clipboard Paster errors will generate messages as above. If an unh
 
 3. A 'mutation monitor' process is launched. The mutation monitor reacts to newly-rendered inline images, and fields that have been newly hidden or displayed via branching rules. The interval between mutation checks is 100ms.
 
-## When the 'paste image' link is clicked ##
+### When the 'paste image' link is clicked ##
 
 1. The contents of the clipboard are fetched by the Clipboard Web API (https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/read) and converted to a base64-encoded string using the FileReader Web API (https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsDataURL).
 
@@ -120,7 +124,7 @@ All 'handled' Clipboard Paster errors will generate messages as above. If an unh
 
 6. Within 100ms the mutation monitor will pick up the newly-rendered image, and if the enhanced image view option is configured in the EM settings, will relocate the image to the full-width image container.
 
-## Branching rules support
+### Branching rules support
 
 If the mutation monitor picks up an 'enhanced' field that has been newly hidden or displayed as the result of a data entry branching rule, the visibility of its associated full-width enhancement container is set accordingly.
 
