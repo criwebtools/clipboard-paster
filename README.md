@@ -36,7 +36,7 @@ Here I have (1) copied an image from a website and then (2) clicked on the 'Past
 
 ![image of a form after pasting an image](images/example2.png)
 
-Note that the 'Paste image' link is still present for the upload field into which I just pasted the image, except that it has been reduced to an icon. The link label has been crowded out by the newly-rendered 'Upload new version', 'remove file' and 'Send-it' links.
+Note that the 'Paste image' link is still present for the upload field into which I just pasted the image, except that the label has been reduced to just 'Paste'.
 
 Note that in this example, I clicked on an image on a web page, right-clicked and selected 'copy image' to place the image in the clipboard. The more common use-case for this feature will be to use a screen grabber like the Windows 'snipping' tool, the PrtSc button or the powerful Greenshot tool (https://getgreenshot.org/). Just take your shot and click the Paste image link!
 

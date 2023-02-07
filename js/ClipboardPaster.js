@@ -305,7 +305,7 @@ Yes3.Monitor_UploadFieldActions = function(){
             $inLineImage
                 .off('dblclick')
                 .on('dblclick', function(){Yes3.openInlineImage( this )})
-                .attr('title', Yes3.labels.double_click_to_open + "\n" + Yes3.labels.remove_before_replace)
+                .attr('title', Yes3.labels.double_click_to_open)
                 .addClass('yes3-handled')
             ;
         }
