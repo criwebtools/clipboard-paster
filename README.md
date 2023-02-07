@@ -86,7 +86,7 @@ If you receive a "No clipboard access" message whilst attempting a paste, you mu
 
 ## Error handling
 
-### Paste errors
+### Attempting to paste non-image data
 
 The clipboard can store any sort of object, and so if the last thing you copied was not an image, or if there's nothing in the clipboard, you will behold this message:
 
@@ -94,7 +94,7 @@ The clipboard can store any sort of object, and so if the last thing you copied 
 
 The message box will go away after 10 seconds, or if you click on it.
 
-*** Other errors ***
+### Other errors ###
 
 All 'handled' Clipboard Paster errors - including browser permission errors - will generate messages as above. If an unhandled condition is encountered, please get back to us at redcap@yale.edu.
 
