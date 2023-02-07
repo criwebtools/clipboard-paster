@@ -8,11 +8,17 @@ html {
     --yes3-subtle: gray;
     --yes3-background: white;
     --yes3-border: lightgray;
+    --yes3-divider: rgb(200,200,200);
 
     --yes3-input: rgb(48, 48, 48);
     --yes3-input-background: white;
 
     --yes3-paste-link: purple;
+}
+
+tr.yes3-textarea-parent-row {
+
+    border-top: 2px solid var(--yes3-divider) !important;
 }
 
 div.yes3-uploadcontainer-label {
@@ -23,13 +29,17 @@ div.yes3-uploadcontainer-label {
     line-height: 2em;
 }
 
+.yes3-uploadcontainer-row{
+
+    border-bottom: 2px solid var(--yes3-divider);
+}
+
 .yes3-inline-image-container {
 
     width: 100%;
     min-height: 50px;
-    background-color: var(--yes3-background);
-    color: var(--yes3-color);
-    padding: 0.5em;
+    background-color: transparent;
+    padding: 0;
     display: none;
 }
 
@@ -49,8 +59,9 @@ td.yes3-textarea{
 
     width: 100%;
     color: var(--yes3-color);
-    background-color: var(--yes3-background);
-    padding: 0.5em;
+    background-color: transparent;
+    padding: 0;
+    border: 0;
 }
 
 textarea.yes3-textarea {
@@ -61,7 +72,8 @@ textarea.yes3-textarea {
     font-weight: 600;
     padding: 0.5em;
     resize: vertical !important;
-    border: 1px solid var(--yes3-border);
+    /*border: 1px solid var(--yes3-border);*/
+    border: 0;
 }
 
 .yes3-error {
@@ -103,13 +115,20 @@ textarea.yes3-textarea {
     top: 0;
     left: 0;
     border: 3px solid var(--yes3-danger);
-    padding: 10px;
-    color: var(--yes3-danger);
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 1em;
+    padding-right: 1em;
     background-color: var(--yes3-background);
-    font-size: 1em;
-    font-weight: 700;
     z-index: 1000;
     max-width: 450px;
+}
+
+.yes3-error-message-container p {
+
+    color: var(--yes3-danger);
+    font-size: 1em;
+    font-weight: 700;
 }
 
 .yes3-error-message-container:hover {
@@ -119,7 +138,7 @@ textarea.yes3-textarea {
 
 .yes3-subtle{
 
-    color: var(--yes3-subtle);
+    color: var(--yes3-subtle) !important;
 }
 
 .yes3-small {

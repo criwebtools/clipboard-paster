@@ -22,7 +22,8 @@ Yes3.labels = {
     'double_click_to_open': 'Double-click to view full-size image in a separate window.',
     'no_image_on_clipboard': 'No can do: the clipboard contains non-image data.',
     'paste_failed': 'The paste operation failed: see the console log for details.',
-    'click_to_close': 'Cick here to close this message.'
+    'click_to_close_message': 'Click here to close this message.',
+    'see_console_log': 'See console log for details.'
 }
 
 /**
@@ -78,7 +79,9 @@ Yes3.UI_UploadFields = function() {
             'id': `yes3-inline-image-${Yes3.pasteable_fields[i]}`
         }))
 
-        $itemContainerRow.after( $imageRow );
+        $itemContainerRow
+            .before( $imageRow )
+            .addClass('yes3-uploadcontainer-row');
     }
 }
 
@@ -99,9 +102,9 @@ Yes3.UI_NotesFields = function() {
         $(this).addClass('yes3-textarea');
 
         $inputRow = $('<tr>', {
-                'class': 'yes3-textarea-row',
+                'class': 'yes3-textarea-input-row',
                 'field_name': field_name,
-                'id': `yes3-textarea-row-${field_name}`
+                'id': `yes3-textarea-input-row-${field_name}`
             })
             .append( $('<td>', {
                 'colspan': '2',
@@ -112,7 +115,10 @@ Yes3.UI_NotesFields = function() {
             )
         ;
 
-        $tr.after( $inputRow );
+        $tr
+            .addClass('yes3-textarea-parent-row')
+            .after( $inputRow )
+        ;
 
         // remove the 'expand' link, cuz these are resizable fields
         $(`div#${field_name}-expand`).remove();
@@ -151,7 +157,7 @@ Yes3.openInlineImage = function( img ) {
         h = H;
     }
 
-    console.log(w, h);
+    //console.log(w, h);
 
     const popup = Yes3.openPopupWindow( img.src, w+1, h+1 );
 
@@ -232,7 +238,7 @@ Yes3.pasteImage = async function ( field_name ) {
     }
     catch (e) {
         console.error(e);
-        Yes3.postErrorMessage( Yes3.labels.paste_failed );
+        Yes3.postErrorMessage( `${e}<br>${Yes3.labels.see_console_log}`);
     }
 }
 
@@ -257,7 +263,7 @@ Yes3.Monitor = function(){
  */
 Yes3.Monitor_BranchingActions = function(){
 
-    $('tr.yes3-inline-image-row, tr.yes3-textarea-row').each(function(){
+    $('tr.yes3-inline-image-row, tr.yes3-textarea-input-row').each(function(){
 
         if ( $(this).prev().is(':visible') ){
 
@@ -283,8 +289,6 @@ Yes3.Monitor_UploadFieldActions = function(){
 
         const $linkContainer = $(`div#${field_name}-linknew`);
 
-        const $hasDataLinkContainer = $linkContainer.find('span.edoc-link');
-
         const $fileUploadContainer = $(`#fileupload-container-${field_name}`);
 
         // The normal REDCap inline image
@@ -292,9 +296,9 @@ Yes3.Monitor_UploadFieldActions = function(){
         // in the original field row (and must be moved).
         const $inLineImage = $fileUploadContainer.find('img.file-upload-inline');
 
-        //const hasData = $fileUploadContainer.find(`a#${field_name}-link`).is(':visible');
+        const hasData = $fileUploadContainer.find(`a[name=${field_name}]`).is(':visible');
 
-        const hasData = $hasDataLinkContainer.length;
+        //const hasData = $edocLinkSpan.length;
 
         if ( hasData && $inLineImage.length && !$inLineImage.hasClass('yes3-handled')) {
 
@@ -303,7 +307,7 @@ Yes3.Monitor_UploadFieldActions = function(){
                 .on('dblclick', function(){Yes3.openInlineImage( this )})
                 .attr('title', Yes3.labels.double_click_to_open + "\n" + Yes3.labels.remove_before_replace)
                 .addClass('yes3-handled')
-                ;
+            ;
         }
 
         /**
@@ -332,7 +336,7 @@ Yes3.Monitor_UploadFieldActions = function(){
                 'title': Yes3.labels.click_to_paste,
                 'style': `font-size:${pasteLinkFontSize};`,
                 'aria-label': Yes3.labels.click_to_paste,
-                'html': ( hasData ) ? "<i class='fa fa-clipboard mr-1'></i>" : "<i class='fa fa-clipboard mr-1'></i>Paste image"
+                'html': ( hasData ) ? "<i class='fa fa-clipboard mr-1'></i>Paste" : "<i class='fa fa-clipboard mr-1'></i>Paste image"
             }).on('click', function(){Yes3.pasteImage(field_name)} );
 
             $pasteLinkContainer.append( $delim );
@@ -356,11 +360,22 @@ Yes3.Monitor_UploadFieldActions = function(){
             })
 
             /**
-             * the 'edoc' link container has an annoying trailing hard space
+             * the link container has an annoying trailing hard space
+             * that may be in two different places(!)
              */
             if ( hasData ){
 
-                $hasDataLinkContainer.html( $hasDataLinkContainer.html().replaceAll('&nbsp;', '') );
+                let $linkSpan = $fileUploadContainer.find('span.edoc-link');
+
+                if ( !$linkSpan.length ){
+
+                    $linkSpan = $fileUploadContainer.find('span.sendit-lnk');
+                }
+
+                if ( $linkSpan.length ){
+                    
+                    $linkSpan.html( $linkSpan.html().replaceAll('&nbsp;', '') );
+                }
 
                 //console.log( 'check ==>', $hasDataLinkContainer.html() );
 
@@ -487,8 +502,8 @@ Yes3.postErrorMessage = function( msg ){
     $ele = $('<div>', {
 
         'class': 'yes3-error-message-container',
-        'title': Yes3.labels.click_to_close,
-        'html': "<p>" + msg + "</p><p class='yes3-subtle yes3-small yes3-centered'>click here to close this message</p>"
+        'title': Yes3.labels.click_to_close_message,
+        'html': `<p class='yes3-centered'>${msg}</p><p class='yes3-subtle yes3-small yes3-centered'>${Yes3.labels.click_to_close_message}</p>`
     });
 
     $('body').append( $ele );

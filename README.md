@@ -30,6 +30,8 @@ As you see, the only user interface change is the addition of the 'Paste image' 
 
 ### Pasting an image
 
+> The first time you attempt to paste an image into a REDCap upload field, the browser will ask for permission to access the clipboard. You should select the 'allow access' option. If clipboard access is denied or if you mistakenly select 'block access', you will have to manually reset the browser's clipboard access permission setting. See **Allow Browser Clipboard Access** below.
+
 Here I have (1) copied an image from a website and then (2) clicked on the 'Paste image' link. As you see, the image has been stored and is now displayed as an inline image. 
 
 ![image of a form after pasting an image](images/example2.png)
@@ -56,6 +58,32 @@ The optional enhancements are enabled through the usual EM conguration link, as 
 
 ![image of the EM configuration settions](images/example5.png)
 
+## Allow Browser Clipboard Access
+
+If you receive a "No clipboard access" message whilst attempting a paste, you must manually reset this browser setting. Instructions for various browsers are shown below.
+
+### Chrome
+
+1. Open Chrome browser Settings.
+
+2. Select Security & Privacy > Site Settings > Permissions > Clipboard.
+
+3. Select Allow. 
+
+### Edge
+
+1. Select the lock icon in the address bar.
+
+2. Change the Permissions for this site > Clipboard setting to Allow
+
+### Firefox
+
+(content to be added)
+
+### Safari
+
+(content to be added)
+
 ## Error handling
 
 ### Paste errors
@@ -67,6 +95,34 @@ The clipboard can store any sort of object, and so if the last thing you copied 
 The message box will go away after 10 seconds, or if you click on it.
 
 All 'handled' Clipboard Paster errors will generate messages as above. If an unhandled condition is encountered, please get back to us at redcap@yale.edu.
+
+# How it works
+
+When the REDCap form is rendered:
+
+1. If the full-width image view is selected in the EM settings, full-width containers are injected below each upload field marked with the @INLINE tag.
+
+2. If the full-width notes field is selected in the EM settings, fuill-width containers are injected below each notes field, and the textarea input controls are relocated to them.
+
+3. A 'mutation monitor' process is launched, that checks for changes in the UI such as new inline image renderings. The interval between mutation checks is 100ms.
+
+When the 'paste image' link is clicked, the following actions ensue:
+
+1. The contents of the clipboard are fetched by the Clipboard Web API (https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/read) and converted to a base64-encoded string using the FileReader Web API (https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsDataURL).
+
+2. The REDCap popup upload form is opened by a call to the REDCap function filePopup().
+
+3. The popup upload form input 'myfile_base64' is populated with the base64-encoded string from (1).
+
+4. The form's submit event is triggered programmatically.
+
+5. REDCap uploads the image string, and then renders it as an inline image.
+
+6. Within 100ms the mutation monitor will pick up the newly-rendered image, and if the enhanced image view option is configured in the EM settings, will relocate the image to the full-width image container.
+
+
+
+
 
 
 
