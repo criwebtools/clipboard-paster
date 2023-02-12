@@ -70,11 +70,12 @@ Yes3.UI = function(){
 
     /**
      * textarea relocations
-     */
+     
     if ( Yes3.notes_field_layout==='enhanced' ){
         
         Yes3.UI_NotesFields();
     }
+    */
 
     Yes3.UI_Copyright();
 }
@@ -102,75 +103,11 @@ Yes3.UI_UploadFields = function() {
             'text': Yes3.labels.paste_image_here,
             'title': Yes3.labels.paste_image_here_tooltip
             })
-            .attr('yes3-field-name', field_name)
+            .attr('field_name', field_name)
         ;
 
         $fileUploadContainer.prepend( $pasteTarget );
-
-        if ( Yes3.upload_field_layout!=='enhanced' ){
-
-            continue;
-        }
-
-        const $imageRow = $('<tr>', {
-
-            'class': 'yes3-inline-image-row',
-            'field_name': field_name,
-            'id': `yes3-inline-image-row-${field_name}`
-
-        }).append($('<td>', {
-
-            'colspan': '2',
-            'class': 'yes3-inline-image-container',
-            'data-field_name': field_name,
-            'id': `yes3-inline-image-${field_name}`
-        }))
-
-        $itemContainerRow
-            .before( $imageRow )
-            .addClass('yes3-uploadcontainer-row')
-        ;
     }
-}
-
-/**
- * Relocates each notes field to a new full-width container just beneath the original container
- * (which retains label and history/comment buttons).
- */
-Yes3.UI_NotesFields = function() {
-
-    const $textFields = $('textarea.notesbox');
-
-    $textFields.each(function(){
-
-        const $tr = $(this).closest('tr');
-
-        const field_name = $(this).attr('name');
-
-        $(this).addClass('yes3-textarea');
-
-        $inputRow = $('<tr>', {
-                'class': 'yes3-textarea-input-row',
-                'field_name': field_name,
-                'id': `yes3-textarea-input-row-${field_name}`
-            })
-            .append( $('<td>', {
-                'colspan': '2',
-                'class': 'yes3-textarea',
-                'field_name': field_name,
-                'id': `yes3-textarea-${field_name}`
-                }).append( $(this) )
-            )
-        ;
-
-        $tr
-            .addClass('yes3-textarea-parent-row')
-            .after( $inputRow )
-        ;
-
-        // remove the 'expand' link, cuz these are resizable fields
-        $(`div#${field_name}-expand`).remove();
-    });
 }
 
 // a bit tongue-in-cheeky
@@ -287,9 +224,6 @@ Yes3.processClipboardImage = async function ( field_name ) {
  *  (4) Triggers the form's submit action.
  * 
  * After the form is submitted, the inline image is rendered by REDCap.
- * 
- * Within 100ms the 'mutation monitor' Yes3.Monitor_UploadFieldActions() will pick up the image rendering,
- * and if the enhanced UI setting is selected, will relocate the image to the full-width container
  */
 
 Yes3.uploadClipboardImage = async function( field_name, blob ){
@@ -304,9 +238,6 @@ Yes3.uploadClipboardImage = async function( field_name, blob ){
         $('form#form_file_upload').find('input[name=myfile_base64]').val(base64data);
 
         $('form#form_file_upload').trigger('submit');
-
-        // in case the alternate approach was taken..
-        $('.yes3-alt-paste-container').remove()
     }
     catch(e) {
 
@@ -316,38 +247,14 @@ Yes3.uploadClipboardImage = async function( field_name, blob ){
 
 Yes3.Monitor = function(){
 
-    Yes3.Monitor_BranchingActions();
     Yes3.Monitor_UploadFieldActions();
 }
 
 /**
- * Reacts to branching logic affecting notes fields managed by this EM.
- * Specifically, shows or hides the inserted rows
- * that contain the relocated inline images and notes controls,
- * based on the visibility of the original field rows
- * which now contain the field labels and sundries.
- */
-Yes3.Monitor_BranchingActions = function(){
-
-    $('tr.yes3-inline-image-row, tr.yes3-textarea-input-row').each(function(){
-
-        const field_name = $(this).attr('field_name');
-
-        if ( $(`tr#${field_name}-tr`).is(':visible') ){
-
-            if ( $(this).is(":hidden") ) $(this).show();
-        }
-        else {
-
-            if ( $(this).is(":visible") ) $(this).hide();
-        }
-    })
-}
-
-/**
  * Reacts to user paste, upload and remove actions:
- *  (1) After upload: Relocates inline image to the inserted full-width container.
- *  (2) After remove: Empties the inserted full-width container
+ *  (1) Ensure inline image has a double-click listener
+ *  (2) Ensure that the appropriate paste link is onscreen, depending on whether inline image is displayed (clipboard API supported)
+ *  (3) or 'paster patch' is visible or hidden, as appropriate (clipboard API not supported)
  */
 Yes3.Monitor_UploadFieldActions = function(){
 
@@ -423,7 +330,7 @@ Yes3.Monitor_UploadFieldActions = function(){
                     K++;
                 }
             }
-            // does not have data
+            // does not have data: show paster patch, force text to the canned label
             else {
 
                 // force the purple paster patch text
@@ -525,49 +432,6 @@ Yes3.Monitor_UploadFieldActions = function(){
             }
 
         } // browser allows access to clipboard and paste link element undefined
-
-        /**
-         * all done if the enhanced layout is disabled
-         */
-        if ( Yes3.upload_field_layout !== 'enhanced' ){
-
-            continue;
-        }
-
-        const $fullwidthImageContainer = $(`td#yes3-inline-image-${field_name}`);
-
-        // if no upload then hide the fullwidth container
-        if ( !hasData ){
-
-            // if upload has been removed but relocated upload image remains, remove it
-            if ( $fullwidthImageContainer.is(':visible')) {
-
-                $fullwidthImageContainer.hide().find('img').remove();
-                K++;
-            }
-        }
-        // otherwise show it and relocate the inline image to it
-        else {
-            // Upload field populated with REDCap inline image still displayed,
-            // so relocate image to inserted fill-width image container.
-            if ( $inLineImage.length ){
-
-                $fullwidthImageContainer
-                    .empty()
-                    //.removeClass('yes3-clickable')
-                    .append($inLineImage)
-                    //.off('click')
-                    .show()
-                ;
-                
-                // Replace the image styling class
-                $inLineImage
-                    .removeClass('file-upload-inline')
-                    .addClass('yes3-file-upload-inline')
-                ;
-                K++;
-            }
-        }
     }
 
     if ( K ){
@@ -666,67 +530,58 @@ Yes3.removeErrorMessage = function(){
     $('div.yes3-error-message-container').remove();
 }
 
-document.addEventListener('paste', function (evt) {
+/**
+ * for browsers that require a user-initiated paste event (Firefox, ..)
+ */
+Yes3.addPasteEventListeners = function(){
 
-    console.log('paste event called', evt.target );
+    let pasteTargets = document.getElementsByClassName("yes3-paste-target");
 
-    if ( !evt.target.classList || !evt.target.classList.contains('yes3-paste') ) {
+    // create array from htmlCollection pasteTargets and attach listeners
+    Array.from(pasteTargets).forEach((pasteTarget) => {
 
-        return;
-    }
+        pasteTarget.addEventListener('paste', function (evt) {
 
-    let field_name = '';
+            const field_name = pasteTarget.getAttribute('field_name');
+   
+            /*
+                ClipboardEvent.clipboardData is a dataTransfer object:
+    
+                ref: https://developer.mozilla.org/en-US/docs/Web/API/ClipboardEvent/clipboardData
+                items ref: https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem
+            */
+    
+            const clipboardItems = evt.clipboardData.items;
+    
+            // ref: https://stackoverflow.com/questions/2125714/explanation-of-slice-call-in-javascript
+            const items = [].slice.call(clipboardItems).filter(function (item) {
+    
+                // Filter the image items only
+                return item.type.indexOf('image') !== -1;
+            });
+    
+            if (items.length === 0) {
+    
+                Yes3.postErrorMessage(Yes3.labels.no_image_on_clipboard);
+                return;
+            }
+    
+            const item = items[0];
+    
+            const blob = item.getAsFile();
+    
+            Yes3.uploadClipboardImage(field_name, blob);
+        })
+    })
+}
 
-    for (const attr of evt.target.attributes ) {
-
-        if ( attr.name==='yes3-field-name' ){
-
-            field_name = attr.value;
-            break;
-        }
-    }
-
-    //console.log('field_name:', field_name); 
-
-    if ( field_name.length===0 ){
-
-        return;
-    }
-
-    /*
-        ClipboardEvent.clipboardData is a dataTransfer object:
-
-        ref: https://developer.mozilla.org/en-US/docs/Web/API/ClipboardEvent/clipboardData
-        items ref: https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem
-    */
-
-    const clipboardItems = evt.clipboardData.items;
-
-    // ref: https://stackoverflow.com/questions/2125714/explanation-of-slice-call-in-javascript
-    const items = [].slice.call(clipboardItems).filter(function (item) {
-
-        // Filter the image items only
-        return item.type.indexOf('image') !== -1;
-    });
-
-    if (items.length === 0) {
-
-        Yes3.postErrorMessage(Yes3.labels.no_image_on_clipboard);
-        return;
-    }
-
-    const item = items[0];
-
-    const blob = item.getAsFile();
-
-    Yes3.uploadClipboardImage(field_name, blob);
-
-});
-
+/**
+ * autopopulate fields and values are passed to the client as the object Yes3.initializations
+ */
 Yes3.autoPopulate = function(){
 
     // no autocomplete if form is marked 'completed'
-    
+
     const completion = $(`tr#${Yes3.instrument}_complete-tr select[name=${Yes3.instrument}_complete]`).val();
 
     if ( completion === '2' ){
@@ -753,11 +608,26 @@ $(function(){
 
     console.log('welcome to clipboard paster');
 
-    Yes3.autoPopulate();
-
+    /**
+     * sets:
+     * 
+     *      Yes3.clipboardApiIsSupported
+     *      Yes3.clipboardApiPermission ('denied', 'granted', 'unavailable')
+     */
     Yes3.isClipboardApiSupported();
 
-    Yes3.UI(); // UI renovations
+    Yes3.autoPopulate();
+
+    Yes3.UI(); // minor UI renovations
+
+    /**
+     * if the Clipboard API is not supported, then clipboard must
+     * be read in response to a user-initiated paste event
+     */
+    if ( !Yes3.clipboardApiIsSupported ){
+
+        Yes3.addPasteEventListeners();
+    }
 
     Yes3.startMutationMonitoring();
 })
