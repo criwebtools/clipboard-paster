@@ -309,7 +309,7 @@ Yes3.Monitor = function(){
  */
 Yes3.Monitor_UploadFieldActions = function(){
 
-    let K = 1; // count of mutation reactions
+    let K = 0; // count of mutation reactions
    
     for(let i=0; i<Yes3.pasteable_fields.length; i++){
 
