@@ -24,7 +24,7 @@
 
     "project-settings": [
         {
-            "key": "introduction-1",
+            "key": "introduction",
             "name": "<h4>Welcome to the Clipboard Paster</h4><p>The Clipboard Paster adds the following features to REDCap:<p><ol><li>Images stored in the clipboard (e.g. screenshots) may be pasted into file upload fields designated as @INLINE.</li><li>Double-clicking on an inline image will open it into a new window or tab, sized to the underlying dimensions if the image.</li><li>Inline images may optionally be displayed in full-width containers placed just below the form fields.</li><li>Notes fields may optionally be reformatted to full-with, resizeable input controls.</li></ol>",
             "type": "descriptive"
         },

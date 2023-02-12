@@ -14,16 +14,48 @@ $.fn.y3center = function () {
 
 Yes3.MONITOR_INTERVAL = 100; // mutation monitor interval, ms
 
+Yes3.DOWNLOAD_IMAGE_TEXT = 'download image';
+
 Yes3.windowNumber = 0; // used in the naming of popups
 
+Yes3.clipboardApiIsSupported = false;
+Yes3.clipboardApiPermission = "";
+
+// for eventual multilanguage support
 Yes3.labels = {
-    'click_to_paste': 'Click here to paste an image from the clipboard.',
-    'remove_before_replace': 'To replace this image, first remove it.',
-    'double_click_to_open': 'Double-click to view full-size image in a separate window.',
-    'no_image_on_clipboard': 'No can do: the clipboard contains non-image data.',
-    'paste_failed': 'The paste operation failed: see the console log for details.',
-    'click_to_close_message': 'Click here to close this message.',
-    'see_console_log': 'See console log for details.'
+    'click_to_paste':               'Click here to paste an image from the clipboard.',
+    'remove_before_replace':        'To replace this image, first remove it.',
+    'double_click_to_open':         'Double-click to view full-size image in a separate window.',
+    'no_image_on_clipboard':        'No can do: the clipboard contains non-image data. See the console log for details.',
+    'paste_failed':                 'The paste operation failed: see the console log for details.',
+    'click_to_close_message':       'Click here to close this message.',
+    'paste_image_here':             'Paste image here',
+    'paste_image_here_tooltip':     'Click here, and then paste the image using Ctrl-V, the context menu (right-click) or whatever is appropriate for this browser.',
+    'see_console_log':              'See console log for details.',
+    'clipboard_permission_denied':  'Permission to access the clipboard is denied. See the EM documentation for instructions to allow access for your browser.'
+}
+
+/**
+ * Determines whether clipboard API is supported by this browser.
+ * Sets Yes3.clipboardApiIsSupported
+ * 
+ */
+Yes3.isClipboardApiSupported = async function(){
+
+    try {
+
+        const perm = await navigator.permissions.query({ name: 'clipboard-read' });
+
+        Yes3.clipboardApiIsSupported = true;
+        Yes3.clipboardApiPermission = perm.state;
+    }
+    catch(e) {
+
+        console.log('Yes3.isClipboardApiSupported: ', e);
+
+        Yes3.clipboardApiIsSupported = false;
+        Yes3.clipboardApiPermission = "unavailable";
+    }
 }
 
 /**
@@ -58,30 +90,46 @@ Yes3.UI_UploadFields = function() {
     
     for(let i=0; i<Yes3.pasteable_fields.length; i++){
 
+        const field_name = Yes3.pasteable_fields[i];
+
+        const $fileUploadContainer = $(`#fileupload-container-${field_name}`);
+
+        const $itemContainerRow = $(`tr#${field_name}-tr`);
+
+        const $pasteTarget = $('<textarea>', {
+            'id': 'yes3-paste-' + field_name,
+            'class': 'yes3-paste-target yes3-paste',
+            'text': Yes3.labels.paste_image_here,
+            'title': Yes3.labels.paste_image_here_tooltip
+            })
+            .attr('yes3-field-name', field_name)
+        ;
+
+        $fileUploadContainer.prepend( $pasteTarget );
+
         if ( Yes3.upload_field_layout!=='enhanced' ){
 
             continue;
         }
 
-        const $itemContainerRow = $(`tr#${Yes3.pasteable_fields[i]}-tr`);
-
         const $imageRow = $('<tr>', {
 
             'class': 'yes3-inline-image-row',
-            'field_name': Yes3.pasteable_fields[i],
-            'id': `yes3-inline-image-row-${Yes3.pasteable_fields[i]}`
+            'field_name': field_name,
+            'id': `yes3-inline-image-row-${field_name}`
 
         }).append($('<td>', {
 
             'colspan': '2',
             'class': 'yes3-inline-image-container',
-            'data-field_name': Yes3.pasteable_fields[i],
-            'id': `yes3-inline-image-${Yes3.pasteable_fields[i]}`
+            'data-field_name': field_name,
+            'id': `yes3-inline-image-${field_name}`
         }))
 
         $itemContainerRow
             .before( $imageRow )
-            .addClass('yes3-uploadcontainer-row');
+            .addClass('yes3-uploadcontainer-row')
+        ;
     }
 }
 
@@ -176,9 +224,63 @@ Yes3.openInlineImage = function( img ) {
  * TESTED ON v12.5
  * 
  * Uses the clipboard API to read image from the clipboard.
+ * For browsers that support the Clipboard API ( chrome, edge, safari/macOS ).
  * 
+ * If the clipboard includes an item whose type includes 'image',
+ * that item is read into a blob and Yes3.uploadClipboardImage() is called.
+ * 
+ * @param {*} field_name 
+ */
+Yes3.processClipboardImage = async function ( field_name ) {
+    try {
+
+        let type = '';
+
+        const permission = await navigator.permissions.query({ name: 'clipboard-read' });
+
+        if (permission.state === 'denied') {
+
+            throw new Error( Yes3.labels.clipboard_permission_denied );
+        }
+
+        const clipboardContents = await navigator.clipboard.read();
+
+        for (const item of clipboardContents) {
+
+            for(let i=0; i<item.types.length; i++){
+
+                if ( item.types[i].indexOf('image') !== -1 ){
+
+                    const blob = await item.getType( item.types[i] );
+
+                    Yes3.uploadClipboardImage(field_name, blob);
+
+                    return;
+                }
+                else if ( item.types[i].length ) {
+
+                    if ( type.length ) type += ',';
+
+                    type += item.types[i];
+                }
+            }
+        }
+
+        console.warn(`Attempt to paste non-image data type(s)='${type}', clipboardContents:`, clipboardContents);
+        
+        Yes3.postErrorMessage( Yes3.labels.no_image_on_clipboard );
+    }
+    catch (e) {
+
+        console.error(e);
+
+        Yes3.postErrorMessage( `${e}<br>${Yes3.labels.see_console_log}`);
+    }
+}
+/**
  * Uploads the image by simulating a signature upload:
- *  (1) Uses Filereader to convert image to base64 encoding.
+ * 
+ *  (1) Uses Filereader to convert image to base64 encoding ( via Yes3.blobToBase64(() )
  *  (2) Opens the REDCap upload dialog with the REDCap filePopUp() function.
  *  (3) Populates the myfile_base64 input with the base64 encoded image.
  *      This is interpreted as a signature image in DataEntry/file_upload.php 
@@ -188,64 +290,28 @@ Yes3.openInlineImage = function( img ) {
  * 
  * Within 100ms the 'mutation monitor' Yes3.Monitor_UploadFieldActions() will pick up the image rendering,
  * and if the enhanced UI setting is selected, will relocate the image to the full-width container
- * that was injected on form load by Yes3.UI_UploadFields().
- * 
- * @param {*} field_name 
  */
-Yes3.pasteImage = async function ( field_name ) {
+
+Yes3.uploadClipboardImage = async function( field_name, blob ){
+
     try {
 
-        const permission = await navigator.permissions.query({ name: 'clipboard-read' });
+        const base64data = await Yes3.blobToBase64(blob);
 
-        if (permission.state === 'denied') {
-            throw new Error('Not allowed to read clipboard.');
-        }
+        filePopUp(field_name,0,0);
 
-        const clipboardContents = await navigator.clipboard.read();
+        // fill out the popup form as if it were a signature
+        $('form#form_file_upload').find('input[name=myfile_base64]').val(base64data);
 
-        for (const item of clipboardContents) {
+        $('form#form_file_upload').trigger('submit');
 
-            if (!item.types.includes('image/png')) {
-
-                Yes3.notAnImage(field_name);
-
-                return;
-            }
-
-            const blob = await item.getType('image/png');
-
-            const base64data = await Yes3.blobToBase64(blob);
-
-            const $container = $(`td#yes3-inline-image-${field_name}`);
-
-            const $img = $('<img>', {
-                'src': URL.createObjectURL(blob)
-            })
-            .addClass('yes3-file-upload-inline');
-
-            $container
-                .empty()
-                .append( $img )
-            ;
-
-            filePopUp(field_name,0,0);
-
-            // fill out the popup form as if it were a signature
-            $('form#form_file_upload').find('input[name=myfile_base64]').val(base64data);
-
-            $('form#form_file_upload').trigger('submit');
-        }
+        // in case the alternate approach was taken..
+        $('.yes3-alt-paste-container').remove()
     }
-    catch (e) {
-        console.error(e);
-        Yes3.postErrorMessage( `${e}<br>${Yes3.labels.see_console_log}`);
+    catch(e) {
+
+        Yes3.postErrorMessage(e);
     }
-}
-
-// displays a red 'not an image' message in the paste region for 3 seconds
-Yes3.notAnImage = function( field_name ){
-
-    Yes3.postErrorMessage( Yes3.labels.no_image_on_clipboard);
 }
 
 Yes3.Monitor = function(){
@@ -265,9 +331,11 @@ Yes3.Monitor_BranchingActions = function(){
 
     $('tr.yes3-inline-image-row, tr.yes3-textarea-input-row').each(function(){
 
-        if ( $(this).prev().is(':visible') ){
+        const field_name = $(this).attr('field_name');
 
-            if ( !$(this).is(":visible") ) $(this).show();
+        if ( $(`tr#${field_name}-tr`).is(':visible') ){
+
+            if ( $(this).is(":hidden") ) $(this).show();
         }
         else {
 
@@ -282,10 +350,19 @@ Yes3.Monitor_BranchingActions = function(){
  *  (2) After remove: Empties the inserted full-width container
  */
 Yes3.Monitor_UploadFieldActions = function(){
+
+    let K = 0; // count of mutation reactions
    
     for(let i=0; i<Yes3.pasteable_fields.length; i++){
 
         const field_name = Yes3.pasteable_fields[i];
+
+        // skip fields hidden through branching logic
+
+        if ( $(`tr#${field_name}-tr`).is(':hidden') ) {
+
+            continue;
+        }
 
         const $linkContainer = $(`div#${field_name}-linknew`);
 
@@ -296,24 +373,84 @@ Yes3.Monitor_UploadFieldActions = function(){
         // in the original field row (and must be moved).
         const $inLineImage = $fileUploadContainer.find('img.file-upload-inline');
 
+        // if the download link is visible we conclude that the upload has been made, hence has data
         const hasData = $fileUploadContainer.find(`a[name=${field_name}]`).is(':visible');
 
         //const hasData = $edocLinkSpan.length;
 
-        if ( hasData && $inLineImage.length && !$inLineImage.hasClass('yes3-handled')) {
+        /**
+         * If the download link is visible:
+         * 
+         * (1) Add double-click listener for inline image (opens new window)
+         * (2) Replace the system download link name pattern "signature*" with "download".
+         *      (uploaded images are interpreted as signatures)
+         * 
+         */
+        if ( hasData ) {
 
-            $inLineImage
-                .off('dblclick')
-                .on('dblclick', function(){Yes3.openInlineImage( this )})
-                .attr('title', Yes3.labels.double_click_to_open)
-                .addClass('yes3-handled')
-            ;
+            if ( $inLineImage.length && !$inLineImage.hasClass('yes3-handled')) {
+
+                $inLineImage
+                    .off('dblclick')
+                    .on('dblclick', function(){Yes3.openInlineImage( this )})
+                    .attr('title', Yes3.labels.double_click_to_open)
+                    .attr('field_name', field_name)
+                    .addClass('yes3-handled')
+                ;
+                K++;
+            }
+    
+            if ( $(`a#${field_name}-link`).find('span').text().indexOf('signature_') !== -1){
+    
+                $(`a#${field_name}-link`).find('span').text(Yes3.DOWNLOAD_IMAGE_TEXT);
+                K++;            
+            }
         }
 
         /**
-         * Insert the paste link if not already rendered
+         * Actions that depend on clipboard permission status
          */
-        if ( !$fileUploadContainer.find('.yes3-paste-link').length){
+        // UI reactions for browsers NOT allowing access to clipboard (purple paster patch)
+        if ( Yes3.clipboardApiPermission !== 'granted' ){
+
+            const $pasteTarget = $(`textarea#yes3-paste-${field_name}`);
+               
+            // has data: hide the purple paster patch
+            if ( hasData ){
+                if ( $pasteTarget.is(':visible')) {
+
+                    $pasteTarget.hide();
+                    K++;
+                }
+            }
+            // does not have data
+            else {
+
+                // force the purple paster patch text
+                if ( $pasteTarget.val() !== Yes3.labels.paste_image_here ){
+
+                    $pasteTarget.val( Yes3.labels.paste_image_here );
+                    K++;
+                }
+
+                // show purple paster patch if hidden
+                if ( $pasteTarget.is(':hidden')) {
+
+                    $pasteTarget.show();
+                    K++;
+                }
+            }
+        } 
+
+        /**
+         * UI reactions for browsers ALLOWING access to clipboard (purple paster link)
+         * Namely, insert the purple paster link if not found.
+         * Note: the purple paster link is removed by REDCap when the form refreshes after an upload,
+         * so we don't need to remove it ourselves.      
+         */
+        else if ( !$fileUploadContainer.find('.yes3-paste-link').length){
+
+            //console.log('==> mutation: yes3-paste-link not found for ' + field_name);
 
             const $fileUploadLink = $fileUploadContainer.find('a.fileuploadlink');
 
@@ -329,24 +466,28 @@ Yes3.Monitor_UploadFieldActions = function(){
                 'style': 'padding:0 10px',
                 'html': 'or'
             });
-            
+
             const $pasteLink = $('<a>', {
                 'href': 'javascript:;',
-                'class': 'd-print-none yes3-paste-link',
+                'class': 'd-print-none yes3-paste-link yes3-paste',
                 'title': Yes3.labels.click_to_paste,
                 'style': `font-size:${pasteLinkFontSize};`,
                 'aria-label': Yes3.labels.click_to_paste,
                 'html': ( hasData ) ? "<i class='fa fa-clipboard mr-1'></i>Paste" : "<i class='fa fa-clipboard mr-1'></i>Paste image"
-            }).on('click', function(){Yes3.pasteImage(field_name)} );
+            })
+            .attr('field_name', field_name)
+            .on('click', function(){
+            
+                Yes3.processClipboardImage(field_name)          
+            } );
 
             $pasteLinkContainer.append( $delim );
-
             $pasteLinkContainer.append( $pasteLink );
 
             $linkContainer.append( $pasteLinkContainer );
 
             /**
-             * Tighten up the spacing in the link containter, to make space for the new 'paste image' links 
+             * Tighten up the spacing in the link container, to make space for the new 'paste image' links 
              */
             $linkContainer.find('*').each(function(){
 
@@ -359,6 +500,8 @@ Yes3.Monitor_UploadFieldActions = function(){
                 //console.log('linkContainer', field_name, this, $(this).css('padding-right'), padL, padR, $(this).html().indexOf('&nbsp;'));
             })
 
+            //K++;
+
             /**
              * the link container has an annoying trailing hard space
              * that may be in two different places(!)
@@ -367,22 +510,21 @@ Yes3.Monitor_UploadFieldActions = function(){
 
                 let $linkSpan = $fileUploadContainer.find('span.edoc-link');
 
+                // not there? try this...
                 if ( !$linkSpan.length ){
 
                     $linkSpan = $fileUploadContainer.find('span.sendit-lnk');
+                    K++;
                 }
 
                 if ( $linkSpan.length ){
                     
                     $linkSpan.html( $linkSpan.html().replaceAll('&nbsp;', '') );
+                    K++;
                 }
-
-                //console.log( 'check ==>', $hasDataLinkContainer.html() );
-
-                // remove the file name if this is an image paste, since it looks strange
-                $(`a#${field_name}-link`).find('span').text('download');
             }
-        }
+
+        } // browser allows access to clipboard and paste link element undefined
 
         /**
          * all done if the enhanced layout is disabled
@@ -394,25 +536,17 @@ Yes3.Monitor_UploadFieldActions = function(){
 
         const $fullwidthImageContainer = $(`td#yes3-inline-image-${field_name}`);
 
+        // if no upload then hide the fullwidth container
         if ( !hasData ){
 
             // if upload has been removed but relocated upload image remains, remove it
-            $fullwidthImageContainer.hide().find('img').remove();
+            if ( $fullwidthImageContainer.is(':visible')) {
 
-            // if relocated image container is empty (no image or 'click here..' text),
-            // populate it with the default 'click here..' message and add the listener
-            // (disabled for now)
-            if ( !$fullwidthImageContainer.html().length && false ){
-
-                $fullwidthImageContainer
-                    .addClass('yes3-clickable')
-                    .attr('title', Yes3.labels.click_to_paste)
-                    .html(Yes3.labels.click_to_paste)
-                    .off('click')
-                    .on('click', function(){ Yes3.pasteImage(field_name) } )
-                ;
+                $fullwidthImageContainer.hide().find('img').remove();
+                K++;
             }
         }
+        // otherwise show it and relocate the inline image to it
         else {
             // Upload field populated with REDCap inline image still displayed,
             // so relocate image to inserted fill-width image container.
@@ -431,15 +565,21 @@ Yes3.Monitor_UploadFieldActions = function(){
                     .removeClass('file-upload-inline')
                     .addClass('yes3-file-upload-inline')
                 ;
+                K++;
             }
         }
+    }
+
+    if ( K ){
+
+        console.log('mutation reactions', new Date(), K);
     }
 }
 
 /**
  * A mutation monitor, tailored to branching, upload and paste actions
  */
-Yes3.startMonitoring = function(){
+Yes3.startMutationMonitoring = function(){
 
     setInterval(Yes3.Monitor, Yes3.MONITOR_INTERVAL);
 }
@@ -447,7 +587,7 @@ Yes3.startMonitoring = function(){
 /**
  * ref: https://stackoverflow.com/questions/18650168/convert-blob-to-base64
  * 
- * modified to remove small header inserted by Filereader
+ * modified to remove small comma-separated header inserted by Filereader
  * 
  * @param {*} blob 
  * @returns 
@@ -526,11 +666,98 @@ Yes3.removeErrorMessage = function(){
     $('div.yes3-error-message-container').remove();
 }
 
+document.addEventListener('paste', function (evt) {
+
+    console.log('paste event called', evt.target );
+
+    if ( !evt.target.classList || !evt.target.classList.contains('yes3-paste') ) {
+
+        return;
+    }
+
+    let field_name = '';
+
+    for (const attr of evt.target.attributes ) {
+
+        if ( attr.name==='yes3-field-name' ){
+
+            field_name = attr.value;
+            break;
+        }
+    }
+
+    //console.log('field_name:', field_name); 
+
+    if ( field_name.length===0 ){
+
+        return;
+    }
+
+    /*
+        ClipboardEvent.clipboardData is a dataTransfer object:
+
+        ref: https://developer.mozilla.org/en-US/docs/Web/API/ClipboardEvent/clipboardData
+        items ref: https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem
+    */
+
+    const clipboardItems = evt.clipboardData.items;
+
+    // ref: https://stackoverflow.com/questions/2125714/explanation-of-slice-call-in-javascript
+    const items = [].slice.call(clipboardItems).filter(function (item) {
+
+        // Filter the image items only
+        return item.type.indexOf('image') !== -1;
+    });
+
+    if (items.length === 0) {
+
+        Yes3.postErrorMessage(Yes3.labels.no_image_on_clipboard);
+        return;
+    }
+
+    const item = items[0];
+
+    const blob = item.getAsFile();
+
+    Yes3.uploadClipboardImage(field_name, blob);
+
+});
+
+Yes3.autoPopulate = function(){
+
+    // no autocomplete if form is marked 'completed'
+    
+    const completion = $(`tr#${Yes3.instrument}_complete-tr select[name=${Yes3.instrument}_complete]`).val();
+
+    if ( completion === '2' ){
+
+        return;
+    }
+
+    for (const field_name in Yes3.initializations) {
+
+        const $input = $(`tr#${field_name}-tr input[name=${field_name}]`);
+
+        if ( $input.length && !$input.val() ){
+
+            $input
+                .val(Yes3.initializations[field_name])
+                .addClass('calcChanged')
+                .trigger('change')
+            ;
+        }
+    } 
+}
+
 $(function(){
 
     console.log('welcome to clipboard paster');
 
+    Yes3.autoPopulate();
+
+    Yes3.isClipboardApiSupported();
+
     Yes3.UI(); // UI renovations
 
-    Yes3.startMonitoring(); 
+    Yes3.startMutationMonitoring();
 })
