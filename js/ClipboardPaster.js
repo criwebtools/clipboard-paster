@@ -12,11 +12,28 @@ $.fn.y3center = function () {
     return this;
 }
 
-Yes3.MONITOR_INTERVAL = 100; // mutation monitor interval, ms
 
 Yes3.DOWNLOAD_IMAGE_TEXT = 'download image';
 
 Yes3.windowNumber = 0; // used in the naming of popups
+
+/**
+ * mutation reaction kill switch
+ * 
+ * meant to shut down mutation monitoring in runaway situations likely caused by coding error
+ * 
+ * current kill rule is: more than half of the monitoring intervals are reporting mutation reactions
+ * 
+ * this rule is applied every 5 seconds of monitoring (50 intervals)
+ */
+
+Yes3.MONITOR_INTERVAL = 100; // mutation monitor interval, ms
+Yes3.mutationKillInterval = 0; // number of intervals for this kill check
+Yes3.mutationKillIntervalLimit = 50; // number of intervals for kill switch check (5 sec)
+Yes3.mutationKillMutationIndex = 0; // number of intervals having mutation reactions for this kill check
+Yes3.mutationKillMutationIndexLimit = 25; // number of intervals having mutation reactions for Kill switch trigger
+Yes3.mutationKillSwitchStatus = 0;
+Yes3.mutationReactionCount = 0;
 
 Yes3.clipboardApiIsSupported = false;
 Yes3.clipboardApiPermission = "";
@@ -63,19 +80,7 @@ Yes3.isClipboardApiSupported = async function(){
  */
 Yes3.UI = function(){
 
-    /**
-     * support for pasteable upload fields
-     */
     Yes3.UI_UploadFields();
-
-    /**
-     * textarea relocations
-     
-    if ( Yes3.notes_field_layout==='enhanced' ){
-        
-        Yes3.UI_NotesFields();
-    }
-    */
 
     Yes3.UI_Copyright();
 }
@@ -93,7 +98,7 @@ Yes3.UI_UploadFields = function() {
 
         const field_name = Yes3.pasteable_fields[i];
 
-        const $fileUploadContainer = $(`#fileupload-container-${field_name}`);
+        const $fieldContainer = Yes3.getFieldContainer(field_name);
 
         const $itemContainerRow = $(`tr#${field_name}-tr`);
 
@@ -106,7 +111,7 @@ Yes3.UI_UploadFields = function() {
             .attr('field_name', field_name)
         ;
 
-        $fileUploadContainer.prepend( $pasteTarget );
+        $fieldContainer.prepend( $pasteTarget );
     }
 }
 
@@ -247,8 +252,54 @@ Yes3.uploadClipboardImage = async function( field_name, blob ){
 
 Yes3.Monitor = function(){
 
-    Yes3.Monitor_UploadFieldActions();
+    if ( Yes3.mutationKillSwitchStatus===0 ){
+
+        const K = Yes3.Monitor_UploadFieldActions();
+
+        if ( K ){
+
+            Yes3.mutationReactionCount += K;
+            Yes3.mutationKillMutationIndex++;
+
+            console.log(`mutation monitor: ${K} reactions this interval; ${Yes3.mutationReactionCount} total reactions; index=${Yes3.mutationKillMutationIndex}.`);
+        }
+
+        Yes3.mutationKillInterval++;
+
+        if ( Yes3.mutationKillInterval >= Yes3.mutationKillIntervalLimit ){
+
+            if ( Yes3.mutationKillMutationIndex > Yes3.mutationKillMutationIndexLimit ){
+
+                console.error('Mutation monitoring disabled!');
+                //Yes3.postErrorMessage('ERROR: excessive mutation reactions have been detected. Mutation monitoring is shut down!')
+                Yes3.postErrorMessage('ZOMBIE APOCALYPSE DETECTED!<br>Mutation kill switch activated.')
+                Yes3.mutationKillSwitchStatus = 1;
+            }
+
+            Yes3.mutationKillInterval = 0;
+            Yes3.mutationKillMutationIndex = 0;
+        }
+    }
 }
+
+/**
+ *  EXPLORER'S GUIDE TO MUTATION REACTIONS
+ * 
+ *  div#fileupload-container-{field_name}.fileupload-container      Yes3.getFieldContainer(field_name)
+ *      
+ *      textarea#yes3-paste-{field_name}.yes3-paste-target          static; injected by Yes3.UI_UploadFields. 
+ *                                                                  Visibility set by Yes3.Monitor_UploadFieldActions > Yes3.setPasteBoxVisibility
+ * 
+ *      a#{field_name}-link.filedownloadlink                        static
+ * 
+ *      div#{field_name}-linknew                                    $linkContainer                          
+ * 
+ *          a.fileuploadlink                                        dynamic; rendered by REDCap as either "upload file" or "upload new version"
+ * 
+ *          span.yes3-paste-link                                    dynamic; injected by Yes3.Monitor_UploadFieldActions > Yes3.injectPasteLink 
+ * 
+ */
+
 
 /**
  * Reacts to user paste, upload and remove actions:
@@ -258,7 +309,7 @@ Yes3.Monitor = function(){
  */
 Yes3.Monitor_UploadFieldActions = function(){
 
-    let K = 0; // count of mutation reactions
+    let K = 1; // count of mutation reactions
    
     for(let i=0; i<Yes3.pasteable_fields.length; i++){
 
@@ -270,174 +321,210 @@ Yes3.Monitor_UploadFieldActions = function(){
 
             continue;
         }
-
-        const $linkContainer = $(`div#${field_name}-linknew`);
-
-        const $fileUploadContainer = $(`#fileupload-container-${field_name}`);
-
-        // The normal REDCap inline image
-        // after form render or upload the inline image will displayed 
-        // in the original field row (and must be moved).
-        const $inLineImage = $fileUploadContainer.find('img.file-upload-inline');
-
-        // if the download link is visible we conclude that the upload has been made, hence has data
-        const hasData = $fileUploadContainer.find(`a[name=${field_name}]`).is(':visible');
-
-        //const hasData = $edocLinkSpan.length;
+        
+        /**
+         * react to inline image and download link mutations
+         */
+        K += Yes3.imageAndDownloadLinkMutations( field_name );
 
         /**
-         * If the download link is visible:
-         * 
-         * (1) Add double-click listener for inline image (opens new window)
-         * (2) Replace the system download link name pattern "signature*" with "download".
-         *      (uploaded images are interpreted as signatures)
-         * 
+         * reactions that depend on clipboard permission status
          */
-        if ( hasData ) {
-
-            if ( $inLineImage.length && !$inLineImage.hasClass('yes3-handled')) {
-
-                $inLineImage
-                    .off('dblclick')
-                    .on('dblclick', function(){Yes3.openInlineImage( this )})
-                    .attr('title', Yes3.labels.double_click_to_open)
-                    .attr('field_name', field_name)
-                    .addClass('yes3-handled')
-                ;
-                K++;
-            }
-    
-            if ( $(`a#${field_name}-link`).find('span').text().indexOf('signature_') !== -1){
-    
-                $(`a#${field_name}-link`).find('span').text(Yes3.DOWNLOAD_IMAGE_TEXT);
-                K++;            
-            }
-        }
-
-        /**
-         * Actions that depend on clipboard permission status
-         */
-        // UI reactions for browsers NOT allowing access to clipboard (purple paster patch)
         if ( Yes3.clipboardApiPermission !== 'granted' ){
 
-            const $pasteTarget = $(`textarea#yes3-paste-${field_name}`);
-               
-            // has data: hide the purple paster patch
-            if ( hasData ){
-                if ( $pasteTarget.is(':visible')) {
-
-                    $pasteTarget.hide();
-                    K++;
-                }
-            }
-            // does not have data: show paster patch, force text to the canned label
-            else {
-
-                // force the purple paster patch text
-                if ( $pasteTarget.val() !== Yes3.labels.paste_image_here ){
-
-                    $pasteTarget.val( Yes3.labels.paste_image_here );
-                    K++;
-                }
-
-                // show purple paster patch if hidden
-                if ( $pasteTarget.is(':hidden')) {
-
-                    $pasteTarget.show();
-                    K++;
-                }
-            }
+            K += Yes3.setPasteBoxVisibility( field_name );
         } 
+        else {
 
-        /**
-         * UI reactions for browsers ALLOWING access to clipboard (purple paster link)
-         * Namely, insert the purple paster link if not found.
-         * Note: the purple paster link is removed by REDCap when the form refreshes after an upload,
-         * so we don't need to remove it ourselves.      
-         */
-        else if ( !$fileUploadContainer.find('.yes3-paste-link').length){
+            K += Yes3.injectPasteLink( field_name );
+        }
+    }
 
-            //console.log('==> mutation: yes3-paste-link not found for ' + field_name);
+    return K;
+}
 
-            const $fileUploadLink = $fileUploadContainer.find('a.fileuploadlink');
+Yes3.getFieldContainer = function( field_name ){
 
-            const pasteLinkFontSize = $fileUploadLink.css('font-size');
+    return  $(`#fileupload-container-${field_name}`);
+}
 
-            const $pasteLinkContainer = $('<span>', {
+Yes3.hasData = function( field_name){
 
-                'class': 'yes3-paste-link',
-                'style': `font-size:${pasteLinkFontSize}`
-            });
+    // if the download link is visible we conclude that the upload has been made, hence has data
+    return $(`a#${field_name}-link.filedownloadlink`).is(':visible');
+}
 
-            const $delim = $('<span>',{
-                'style': 'padding:0 10px',
-                'html': 'or'
-            });
+/**
+ * If there is an upload stored for this field:
+ * 
+ * (1) Add double-click listener for inline image (opens new window)
+ * (2) Replace the system download link name display pattern "signature_*" with "download image".
+ *     (uploaded images are interpreted as signatures and given a misleading file name "signature_*.png")
+ * 
+ */
+Yes3.imageAndDownloadLinkMutations = function( field_name ){
 
-            const $pasteLink = $('<a>', {
-                'href': 'javascript:;',
-                'class': 'd-print-none yes3-paste-link yes3-paste',
-                'title': Yes3.labels.click_to_paste,
-                'style': `font-size:${pasteLinkFontSize};`,
-                'aria-label': Yes3.labels.click_to_paste,
-                'html': ( hasData ) ? "<i class='fa fa-clipboard mr-1'></i>Paste" : "<i class='fa fa-clipboard mr-1'></i>Paste image"
-            })
+    if ( !Yes3.hasData( field_name ) ){
+
+        return 0;
+    }
+
+    let K = 0;
+            
+    const $inLineImage = Yes3.getFieldContainer(field_name).find('img.file-upload-inline');
+
+    // the class "yes3_handled" prevents repeated double-click event handler attachments
+    if ( $inLineImage.length && !$inLineImage.hasClass('yes3-handled')) {
+
+        $inLineImage
+            .off('dblclick')
+            .on('dblclick', function(){Yes3.openInlineImage( this )})
+            .attr('title', Yes3.labels.double_click_to_open)
             .attr('field_name', field_name)
-            .on('click', function(){
-            
-                Yes3.processClipboardImage(field_name)          
-            } );
-
-            $pasteLinkContainer.append( $delim );
-            $pasteLinkContainer.append( $pasteLink );
-
-            $linkContainer.append( $pasteLinkContainer );
-
-            /**
-             * Tighten up the spacing in the link container, to make space for the new 'paste image' links 
-             */
-            $linkContainer.find('*').each(function(){
-
-                const padR = parseFloat($(this).css('padding-right'))/2.0;
-                const padL = parseFloat($(this).css('padding-right'))/2.0;
-            
-                $(this).css('padding-right', padR+'px');
-                $(this).css('padding-left', padL+'px');
-
-                //console.log('linkContainer', field_name, this, $(this).css('padding-right'), padL, padR, $(this).html().indexOf('&nbsp;'));
-            })
-
-            //K++;
-
-            /**
-             * the link container has an annoying trailing hard space
-             * that may be in two different places(!)
-             */
-            if ( hasData ){
-
-                let $linkSpan = $fileUploadContainer.find('span.edoc-link');
-
-                // not there? try this...
-                if ( !$linkSpan.length ){
-
-                    $linkSpan = $fileUploadContainer.find('span.sendit-lnk');
-                    K++;
-                }
-
-                if ( $linkSpan.length ){
-                    
-                    $linkSpan.html( $linkSpan.html().replaceAll('&nbsp;', '') );
-                    K++;
-                }
-            }
-
-        } // browser allows access to clipboard and paste link element undefined
+            .addClass('yes3-handled')
+        ;
+        K++;
     }
 
-    if ( K ){
+    if ( $(`a#${field_name}-link`).find('span').text().indexOf('signature_') !== -1){
 
-        console.log('mutation reactions', new Date(), K);
+        $(`a#${field_name}-link`).find('span').text(Yes3.DOWNLOAD_IMAGE_TEXT);
+        K++;            
     }
+
+    return K;
+}
+
+Yes3.setPasteBoxVisibility = function( field_name ){
+
+    K = 0;
+
+    const $pasteTarget = $(`textarea#yes3-paste-${field_name}`);
+               
+    // has data: hide the purple paster patch
+    if ( Yes3.hasData(field_name) ){
+
+        if ( $pasteTarget.is(':visible')) {
+
+            $pasteTarget.hide();
+            K++;
+        }
+    }
+    // does not have data: show paster patch, force text to the canned label
+    else {
+
+        // force the purple paster patch text
+        if ( $pasteTarget.val() !== Yes3.labels.paste_image_here ){
+
+            $pasteTarget.val( Yes3.labels.paste_image_here );
+            K++;
+        }
+
+        // show purple paster patch if hidden
+        if ( $pasteTarget.is(':hidden')) {
+
+            $pasteTarget.show();
+            K++;
+        }
+    }
+
+    return K;
+}
+
+Yes3.injectPasteLink = function( field_name ){
+
+    // all upload process links go here
+    const $fieldContainer = Yes3.getFieldContainer(field_name);
+
+    // if nothing to do then bolt
+    if ( $fieldContainer.find('.yes3-paste-link').length ){
+
+        return 0;
+    }
+
+    let K = 0;
+
+    const hasData = Yes3.hasData(field_name);
+
+    // 'send-it', 'remove' etc links. This is where the new 'paste' link goes
+    const $linkContainer = $(`div#${field_name}-linknew`); 
+
+    // this will match either the 'Upload file' or 'Upload new version' links
+    const $fileUploadLink = $fieldContainer.find('a.fileuploadlink');
+
+    const pasteLinkFontSize = $fileUploadLink.css('font-size');
+
+    const $pasteLinkContainer = $('<span>', {
+
+        'class': 'yes3-paste-link',
+        'style': `font-size:${pasteLinkFontSize}`
+    });
+
+    const $delim = $('<span>',{
+        'style': 'padding:0 10px',
+        'html': 'or'
+    });
+
+    const $pasteLink = $('<a>', {
+        'href': 'javascript:;',
+        'class': 'd-print-none yes3-paste-link yes3-paste',
+        'title': Yes3.labels.click_to_paste,
+        'style': `font-size:${pasteLinkFontSize};`,
+        'aria-label': Yes3.labels.click_to_paste,
+        'html': ( hasData ) ? "<i class='fa fa-clipboard mr-1'></i>Paste" : "<i class='fa fa-clipboard mr-1'></i>Paste image"
+    })
+    .attr('field_name', field_name)
+    .on('click', function(){
+    
+        Yes3.processClipboardImage(field_name)          
+    } );
+
+    $pasteLinkContainer.append( $delim );
+    $pasteLinkContainer.append( $pasteLink );
+
+    $linkContainer.append( $pasteLinkContainer );
+
+    K++;
+
+    /**
+     * Tighten up the spacing in the link container, to make space for the new 'paste image' link
+     */
+    $linkContainer.find('*').each(function(){
+
+        const padR = parseFloat($(this).css('padding-right'))/2.0;
+        const padL = parseFloat($(this).css('padding-right'))/2.0;
+    
+        $(this).css('padding-right', padR+'px');
+        $(this).css('padding-left', padL+'px');
+
+        K++;
+
+        //console.log('linkContainer', field_name, this, $(this).css('padding-right'), padL, padR, $(this).html().indexOf('&nbsp;'));
+    })
+
+    /**
+     * the link container has an annoying trailing hard space
+     * that may be in two different places(!)
+     */
+    if ( hasData ){
+
+        let $linkSpan = $fieldContainer.find('span.edoc-link');
+
+        // not there? try this...
+        if ( !$linkSpan.length ){
+
+            $linkSpan = $fieldContainer.find('span.sendit-lnk');
+            K++;
+        }
+
+        if ( $linkSpan.length ){
+            
+            $linkSpan.html( $linkSpan.html().replaceAll('&nbsp;', '') );
+            K++;
+        }
+    }
+
+    return K;
 }
 
 /**
