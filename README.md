@@ -41,7 +41,7 @@ As you see, instead of a paste *link*, the UI presents a paste *box*, into which
 
 Here I have (1) copied an image from a website and then (2) clicked on the 'Paste image' link. As you see, the image has been stored and is now displayed as an inline image. 
 
-![image of a form after pasting an image](images/example2s.png)
+![image of a form after pasting an image](images/example2.png)
 
 Note that the 'Paste image' link is still present for the upload field into which I just pasted the image, except that the label has been reduced to just 'Paste'.
 
@@ -49,7 +49,7 @@ Note that in this example, I clicked on an image on a web page, right-clicked an
 
 Once the image is rendered, double-clicking on it will open a pop-up window sized to the underlying dimention of the image 
 
-![image of a form after double-clicking on an inline image](images/example3s.png)
+![image of a form after double-clicking on an inline image](images/example3.png)
 
 Now I can more closely examine the image, or move it to another screen as I look over the bug report. Note that this feature is enabled for all inline fields, not just those that contain pasted images.
 
