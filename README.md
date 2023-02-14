@@ -33,7 +33,7 @@ The Clipboard Paster relies on a relatively new browser technology - the Clipboa
 
 ![image of a form after enabling the Clipboard Paster EM, on Firefox](images/example1a.png)
 
-As you see, instead of a paste *link*, the UI presents a paste *box*, into which the user must paste the image. There are a couple of ways to do this. One is to click on 'Paste image here' and then press Ctlr-V to paste. Or, you may *right*-click anywhere in the box and select 'paste' from the popup context menu.
+As you see, instead of a paste *link*, the UI presents a paste *box*, into which the user must paste the image. There are a couple of ways to do this. One is to click on 'Paste image here' and then press Ctlr-V (or Command-V for MacOS) to paste. Or, you may *right*-click anywhere in the box and select 'paste' from the popup context menu.
 
 ### Pasting an image
 
@@ -41,17 +41,11 @@ As you see, instead of a paste *link*, the UI presents a paste *box*, into which
 
 ![image of a browser prompting for permission to access the clipboard](images/clipboard_perm_prompt.png)
 
-If you decline to allow access, the REDCap user interface will adjust by switching to 'manual paste mode', below.
-
-If mistakenly select 'block access', you will have to manually reset the browser's clipboard access permission setting. See **Allow Browser Clipboard Access** below.
-
-### Manual paste mode
-
-If clipboard access is denied by the browser, or if you elected to block access, the REDCap user interface will adjust by switching to 'manual paste mode', in which boxes displaying 'Paste image here' are displayed instead of 'paste image' links.
-
-To paste an image, click in a 'Paste image here' box, and then paste with either the paste key (e.g., Ctrl-V for Windows, Command-V for MacOS), or by right-clicking and selecting 'paste' from the popup context menu.
+If you decline to allow access, the REDCap user interface will adjust by switching to 'manual paste mode', illustrated in the scheenshot below and explained above under **How the UI changes on browsers that require user action to paste**.
 
 ![image of the REDCap user interface when clipboard permission is blocked](images/clipboard_perm_blocked.png)
+
+If you mistakenly selected 'block access', you will have to manually reset the browser's clipboard access permission setting. See **Allow Browser Clipboard Access** below.
 
 Below is a screenshot of a pasted image rendering. 
 
@@ -59,7 +53,7 @@ Below is a screenshot of a pasted image rendering.
 
 Note that in this example, I clicked on an image on a web page, right-clicked and selected 'copy image' to place the image in the clipboard. The more common use-case for this feature will be to use a screen grabber like the Windows 'snipping' tool, the PrtSc button or the powerful Greenshot tool (https://getgreenshot.org/). Just take your shot and click the Paste image link!
 
-Once the image is rendered, double-clicking on it will open a pop-up window sized to the underlying dimention of the image 
+Once the image is rendered, double-clicking on it will open a pop-up window sized to the underlying dimension of the image 
 
 ![image of a form after double-clicking on an inline image](images/example3.png)
 
