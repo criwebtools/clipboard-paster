@@ -29,7 +29,7 @@ As you see, the only user interface change is the addition of the 'Paste image' 
 ![image of a form after enabling the Clipboard Paster EM, on Chrome](images/example1.png)
 
 ### How the UI changes on browsers that require user action to paste
-The Clipboard Paster relies on a relatively new browser technology - the Clipboard API - to paste images. Certain browsers, notably Firefox, do not fully support the Clipboard API and require user action for pasting from the clipboard. If the Clipboard Paster detects incomplete support for the Clipboard API, it will switch to 'manual paste' mode and render a slightly different user interface (UI).
+The Clipboard Paster takes advantage of a relatively new browser technology - the Clipboard API - to paste images (https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API). Certain browsers, notably Firefox, do not fully support the Clipboard API and require user action for pasting from the clipboard. If the Clipboard Paster detects incomplete support for the Clipboard API, it will switch to 'manual paste' mode and render a slightly different user interface (UI).
 
 ![image of a form after enabling the Clipboard Paster EM, on Firefox](images/example1a.png)
 
