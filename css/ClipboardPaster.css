@@ -67,7 +67,7 @@ td.yes3-textarea{
 
 textarea.yes3-textarea {
     width: 100%;
-    min-height: 50px;
+    min-height: 26px;
     color: var(--yes3-input);
     background-color: var(--yes3-input-background);
     font-weight: 600;

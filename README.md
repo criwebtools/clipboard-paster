@@ -37,13 +37,25 @@ As you see, instead of a paste *link*, the UI presents a paste *box*, into which
 
 ### Pasting an image
 
-> The first time you attempt to paste an image into a REDCap upload field on a browser that supports the Clipboard API (Chrome, Edge, Safari), the browser will ask for permission to access the clipboard. You should select the 'allow access' option. If clipboard access is denied or if you mistakenly select 'block access', you will have to manually reset the browser's clipboard access permission setting. See **Allow Browser Clipboard Access** below.
+> The first time you attempt to paste an image into a REDCap upload field on a browser that supports the Clipboard API (Chrome, Edge, Safari), the browser will ask for permission to access the clipboard. You should select the 'allow' option. 
 
-Here I have (1) copied an image from a website and then (2) clicked on the 'Paste image' link. As you see, the image has been stored and is now displayed as an inline image. 
+![image of a browser prompting for permission to access the clipboard](images/clipboard_perm_prompt.png)
+
+If you decline to allow access, the REDCap user interface will adjust by switching to 'manual paste mode', below.
+
+If mistakenly select 'block access', you will have to manually reset the browser's clipboard access permission setting. See **Allow Browser Clipboard Access** below.
+
+### Manual paste mode
+
+If clipboard access is denied by the browser, or if you elected to block access, the REDCap user interface will adjust by switching to 'manual paste mode', in which boxes displaying 'Paste image here' are displayed instead of 'paste image' links.
+
+To paste an image, click in a 'Paste image here' box, and then paste with either the paste key (e.g., Ctrl-V for Windows, Command-V for MacOS), or by right-clicking and selecting 'paste' from the popup context menu.
+
+![image of the REDCap user interface when clipboard permission is blocked](images/clipboard_perm_blocked.png)
+
+Below is a screenshot of a pasted image rendering. 
 
 ![image of a form after pasting an image](images/example2.png)
-
-Note that the 'Paste image' link is still present for the upload field into which I just pasted the image, except that the label has been reduced to just 'Paste'.
 
 Note that in this example, I clicked on an image on a web page, right-clicked and selected 'copy image' to place the image in the clipboard. The more common use-case for this feature will be to use a screen grabber like the Windows 'snipping' tool, the PrtSc button or the powerful Greenshot tool (https://getgreenshot.org/). Just take your shot and click the Paste image link!
 
@@ -71,7 +83,6 @@ If you receive a "No clipboard access" message whilst attempting a paste, you mu
 
 2. Change the Permissions for this site > Clipboard setting to Allow
 
-
 ## Error handling
 
 ### Attempting to paste non-image data
@@ -87,11 +98,11 @@ Let us know immediately if you encounter the following:
 
 ![image of a zombie apocalypes](images/zombie.png)
 
-This is actually pretty serious, as it indicates a runaway situation - no doubt caused by a serious coding error wrought by yous truly - in which the Clipboard Paster is repeatedly creating and destroying some UI element. This condition is detected through a module that detects and reacts to UI "mutations" caused by user actions like pasting or removing uploaded images. When this happens a "mutation kill switch" is activated, that stops the UI mutation/reaction processes. Undead UI elements, mutation kill switches: a Zombie Apocalypse for sure. Anyway, in all likelihood this demented message will never pop up. But if it does...
+This is actually pretty serious, as it indicates a runaway situation - no doubt caused by a serious coding error wrought by yous truly - in which the Clipboard Paster EM is repeatedly creating and/or destroying some UI element; a loop that can significantly degrade performance. This condition is detected through a module that detects and reacts to UI "mutations" caused by user actions like pasting or removing uploaded images. When too many mutation reactions are observed over a period of time, a "mutation kill switch" is activated. This stops the UI mutation/reaction processes, which will effectively shut down the Clipboard Paster EM for the form. In all likelihood this demented message will never pop up. But if it does please let us know ASAP.
 
 ### Other errors ###
 
-All 'handled' Clipboard Paster errors - including browser permission errors - will generate messages as above. If an unhandled condition is encountered, please get back to us at redcap@yale.edu.
+All 'handled' Clipboard Paster errors - including browser permission errors - will generate messages as above. If an unhandled condition is encountered, you may not always be made aware of it other than by observing problems like not being able to paste images. However a diagnostically useful message should be output to the Javascript Console, which you can access through F12 or by right-clicking on the REDCap form and selecting 'inspect'. Please get back to us at redcap@yale.edu, with a screenshot of the Javascript Console if possible.
 
 # Technical Appendix 
 

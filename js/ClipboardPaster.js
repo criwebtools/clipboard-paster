@@ -28,6 +28,7 @@ Yes3.windowNumber = 0; // used in the naming of popups
  */
 
 Yes3.MONITOR_INTERVAL = 100; // mutation monitor interval, ms
+Yes3.MESSAGE_POST_TIME = 100000; // how long to display a message, ms
 Yes3.mutationKillInterval = 0; // number of intervals for this kill check
 Yes3.mutationKillIntervalLimit = 50; // number of intervals for kill switch check (5 sec)
 Yes3.mutationKillMutationIndex = 0; // number of intervals having mutation reactions for this kill check
@@ -49,7 +50,8 @@ Yes3.labels = {
     'paste_image_here':             'Paste image here',
     'paste_image_here_tooltip':     'Click here, and then paste the image using Ctrl-V, the context menu (right-click) or whatever is appropriate for this browser.',
     'see_console_log':              'See console log for details.',
-    'clipboard_permission_denied':  'Permission to access the clipboard is denied. See the EM documentation for instructions to allow access for your browser.'
+    'clipboard_permission_denied':  'Permission to programmatically access the clipboard is denied. See the EM documentation for instructions to allow access for your browser.',
+    'switching_to_manual_paste':    "Permission to programmatically access the clipboard has been blocked, so switching to 'manual paste' mode.<br><br>You may manually paste images into the 'Paste image here' boxes rendered below."
 }
 
 /**
@@ -73,6 +75,8 @@ Yes3.isClipboardApiSupported = async function(){
         Yes3.clipboardApiIsSupported = false;
         Yes3.clipboardApiPermission = "unavailable";
     }
+
+    console.log('isClipboardApiSupported:', Yes3.clipboardApiIsSupported, Yes3.clipboardApiPermission);
 }
 
 /**
@@ -180,7 +184,11 @@ Yes3.processClipboardImage = async function ( field_name ) {
 
         const permission = await navigator.permissions.query({ name: 'clipboard-read' });
 
+        console.warn('processClipboardImage:premission', permission);
+
         if (permission.state === 'denied') {
+
+            Yes3.clipboardApiPermission = 'denied';
 
             throw new Error( Yes3.labels.clipboard_permission_denied );
         }
@@ -214,9 +222,12 @@ Yes3.processClipboardImage = async function ( field_name ) {
     }
     catch (e) {
 
-        console.error(e);
+        //console.error(e);
 
-        Yes3.postErrorMessage( `${e}<br>${Yes3.labels.see_console_log}`);
+        Yes3.clipboardApiPermission = 'denied';
+
+        //Yes3.postErrorMessage( `${e}<br><br>${Yes3.labels.switching_to_manual_paste}`);
+        Yes3.postErrorMessage( Yes3.labels.switching_to_manual_paste );
     }
 }
 /**
@@ -329,13 +340,19 @@ Yes3.Monitor_UploadFieldActions = function(){
 
         /**
          * reactions that depend on clipboard permission status
+         * permissions: prompt, granted, denied
+         * 
+         * note that this will react to the user action 'block' from the clipboard api permission prompt
+         * ('allow' is assumed initially, and so the paste links are rendered and the paste boxes are hidden)
          */
-        if ( Yes3.clipboardApiPermission !== 'granted' ){
+        if ( !Yes3.clipboardApiIsSupported || Yes3.clipboardApiPermission === 'denied' ){
 
+            K += Yes3.removePasteLink( field_name );
             K += Yes3.setPasteBoxVisibility( field_name );
         } 
         else {
 
+            K += Yes3.setPasteBoxVisibility( field_name, true );
             K += Yes3.injectPasteLink( field_name );
         }
     }
@@ -395,14 +412,16 @@ Yes3.imageAndDownloadLinkMutations = function( field_name ){
     return K;
 }
 
-Yes3.setPasteBoxVisibility = function( field_name ){
+Yes3.setPasteBoxVisibility = function( field_name, forceHide ){
+
+    forceHide = forceHide || false;
 
     K = 0;
 
     const $pasteTarget = $(`textarea#yes3-paste-${field_name}`);
                
     // has data: hide the purple paster patch
-    if ( Yes3.hasData(field_name) ){
+    if ( forceHide || Yes3.hasData(field_name) ){
 
         if ( $pasteTarget.is(':visible')) {
 
@@ -429,6 +448,22 @@ Yes3.setPasteBoxVisibility = function( field_name ){
     }
 
     return K;
+}
+
+Yes3.removePasteLink = function( field_name ){
+
+    // all upload process links go here
+    const $fieldContainer = Yes3.getFieldContainer(field_name);
+
+    // if nothing to do then bolt
+    if ( $fieldContainer.find('.yes3-paste-link').length ){
+
+        $fieldContainer.find('.yes3-paste-link').remove();
+
+        return 1;
+    }
+
+    return 0;
 }
 
 Yes3.injectPasteLink = function( field_name ){
@@ -609,7 +644,7 @@ Yes3.postErrorMessage = function( msg ){
 
         $ele.remove();
     
-    }, 10000);
+    }, Yes3.MESSAGE_POST_TIME);
 }
 
 Yes3.removeErrorMessage = function(){
