@@ -12,7 +12,6 @@ $.fn.y3center = function () {
     return this;
 }
 
-
 Yes3.DOWNLOAD_IMAGE_TEXT = 'download image';
 
 Yes3.windowNumber = 0; // used in the naming of popups
@@ -28,7 +27,7 @@ Yes3.windowNumber = 0; // used in the naming of popups
  */
 
 Yes3.MONITOR_INTERVAL = 100; // mutation monitor interval, ms
-Yes3.MESSAGE_POST_TIME = 100000; // how long to display a message, ms
+Yes3.MESSAGE_POST_TIME = 5000; // how long to display a message, ms
 Yes3.mutationKillInterval = 0; // number of intervals for this kill check
 Yes3.mutationKillIntervalLimit = 50; // number of intervals for kill switch check (5 sec)
 Yes3.mutationKillMutationIndex = 0; // number of intervals having mutation reactions for this kill check
@@ -50,8 +49,8 @@ Yes3.labels = {
     'paste_image_here':             'Paste image here',
     'paste_image_here_tooltip':     'Click here, and then paste the image using Ctrl-V, the context menu (right-click) or whatever is appropriate for this browser.',
     'see_console_log':              'See console log for details.',
-    'clipboard_permission_denied':  'Permission to programmatically access the clipboard is denied. See the EM documentation for instructions to allow access for your browser.',
-    'switching_to_manual_paste':    "Permission to programmatically access the clipboard has been blocked, so switching to 'manual paste' mode.<br><br>You may manually paste images into the 'Paste image here' boxes rendered below."
+    'clipboard_permission_denied':  'Permission for the browser to access the clipboard is denied. See the EM documentation for instructions to allow access for your browser.',
+    'switching_to_manual_paste':    "Permission for the browser to access the clipboard has been blocked, so switching to 'manual paste' mode.<br><br>You may manually paste images into the 'Paste image here' boxes rendered below."
 }
 
 /**
