@@ -29,25 +29,25 @@ As you see, the only user interface change is the addition of the 'Paste image' 
 ![image of a form after enabling the Clipboard Paster EM, on Chrome](images/example1.png)
 
 ### How the UI changes on browsers that require user action to paste
-The Clipboard Paster relies on a relatively new browser technology - the Clipboard API - to paste images. Certain browsers, notable Firefox, do not fully support the Clipboard API and require user action for pasting from the clipboard. If the Clipboard Paster detects incomplete support for the Clipboard API, it will render a slightly different user interface (UI).
+The Clipboard Paster relies on a relatively new browser technology - the Clipboard API - to paste images. Certain browsers, notably Firefox, do not fully support the Clipboard API and require user action for pasting from the clipboard. If the Clipboard Paster detects incomplete support for the Clipboard API, it will switch to 'manual paste' mode and render a slightly different user interface (UI).
 
 ![image of a form after enabling the Clipboard Paster EM, on Firefox](images/example1a.png)
 
-As you see, instead of a paste *link*, the UI presents a paste *box*, into which the user must paste the image. There are a couple of ways to do this. One is to click on 'Paste image here' and then press Ctlr-V (or Command-V for MacOS) to paste. Or, you may *right*-click anywhere in the box and select 'paste' from the popup context menu.
+As you see, instead of a paste *link*, the UI presents a paste *box*, into which the user must paste the image. There are a couple of ways to do this. One is to click on 'Paste image here' and then press Ctrl-V (or Command-V for MacOS) to paste. Or, you may *right*-click anywhere in the box and select 'paste' from the popup context menu.
 
 ### Pasting an image
 
-> The first time you attempt to paste an image into a REDCap upload field on a browser that supports the Clipboard API (Chrome, Edge, Safari), the browser will ask for permission to access the clipboard. You should select the 'allow' option. 
+> The first time you attempt to paste an image into a REDCap upload field on a browser that supports the Clipboard API (Chrome, Edge), the browser will ask for permission to access the clipboard. You should select the 'allow' option. 
 
 ![image of a browser prompting for permission to access the clipboard](images/clipboard_perm_prompt.png)
 
-If you decline to allow access, the REDCap user interface will adjust by switching to 'manual paste mode', illustrated in the scheenshot below and explained above under **How the UI changes on browsers that require user action to paste**.
+If you decline to allow access, the REDCap user interface will adjust by switching to 'manual paste mode', illustrated in the screenshot below and explained above under **How the UI changes on browsers that require user action to paste**.
 
 ![image of the REDCap user interface when clipboard permission is blocked](images/clipboard_perm_blocked.png)
 
-If you mistakenly selected 'block access', you will have to manually reset the browser's clipboard access permission setting. See **Allow Browser Clipboard Access** below.
+If you mistakenly selected 'block access', you will have to manually reset the browser's clipboard access permission setting. Instructions for popular browsers are given below, under **Allow Browser Clipboard Access**.
 
-Below is a screenshot of a pasted image rendering. 
+Below is a screenshot of a pasted image. 
 
 ![image of a form after pasting an image](images/example2.png)
 
