@@ -8,8 +8,8 @@ The Clipboard Paster was motivated by the need to store and display screenshots 
 
 ## Features
 - Images stored in the clipboard (e.g. screenshots) may be pasted into file upload fields designated as @INLINE.
-- Double-clicking on an inline image will open it into a new window or tab, sized to the underlying dimensions if the image.
-- Support for new action tags @USER-FIRSTNAME, @USER-LASTNAME and @USER-EMAIL, for autopoulating REDCap form fields
+- Double-clicking on an inline image will open it into a new window or tab, sized to the underlying dimensions of the image.
+- Support for new action tags @USER-FIRSTNAME, @USER-LASTNAME and @USER-EMAIL, for autopopulating REDCap form fields
 
 ## Browser support
 We have tested the Clipboard Paster on Chrome, Edge, Firefox and Safari. 
@@ -44,6 +44,8 @@ As you see, instead of a paste *link*, the UI presents a paste *box*, into which
 If you decline to allow access, the REDCap user interface will adjust by switching to 'manual paste mode', illustrated in the screenshot below and explained above under **How the UI changes on browsers that require user action to paste**.
 
 ![image of the REDCap user interface when clipboard permission is blocked](images/clipboard_perm_blocked.png)
+
+#### ooops
 
 If you mistakenly selected 'block access', you will have to manually reset the browser's clipboard access permission setting. Instructions for popular browsers are given below, under **Allow Browser Clipboard Access**.
 
