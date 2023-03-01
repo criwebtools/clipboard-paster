@@ -97,7 +97,7 @@ Let us know immediately if you encounter the following:
 
 ![image of a zombie apocalypes](images/zombie.png)
 
-This is actually pretty serious, as it indicates a runaway situation - no doubt caused by a serious coding error wrought by yous truly - in which the Clipboard Paster EM is repeatedly creating and/or destroying some UI element; a loop that can significantly degrade performance. This condition is detected through a module that detects and reacts to UI "mutations" caused by user actions like pasting or removing uploaded images. When too many mutation reactions are observed over a period of time, a "mutation kill switch" is activated. This stops the UI mutation/reaction processes, which will effectively shut down the Clipboard Paster EM for the form. In all likelihood this demented message will never pop up. But if it does please let us know ASAP.
+ In all likelihood this demented message will never pop up. But if it does please let us know ASAP. This is actually pretty serious, as it indicates a runaway situation - no doubt caused by a serious coding error wrought by yours truly - in which the Clipboard Paster EM is in a loop, e.g. creating and/or destroying some UI element; a loop that can significantly degrade performance. This condition is detected through a module that monitors and reacts to UI "mutations" caused by user actions like pasting or removing uploaded images. When too many mutation reactions are observed over a period of time, a "mutation kill switch" is activated. This stops the UI mutation/reaction processes, which will effectively shut down the Clipboard Paster EM for the form.
 
 ### Other errors ###
 
